@@ -1,0 +1,139 @@
+---
+title: Quickstart Guide
+description: Get your HelloToms portfolio up and running in minutes with step-by-step setup instructions.
+---
+
+## Prerequisites
+
+Before starting, ensure you have the following installed:
+
+- Node.js version `>=18.0.0`
+- Git
+
+<Callout kind="info">
+  Verify your Node.js version by running `node -v` in your terminal. Download the latest LTS version from [nodejs.org](https://nodejs.org) if needed.
+</Callout>
+
+## Installation
+
+Follow these steps to set up HelloToms locally.
+
+<Steps>
+  <Step title="Clone the Repository" icon="git-pull-request">
+    Open your terminal and clone the HelloToms repository:
+
+    ```bash
+    git clone https://github.com/tomi-budi/hellotoms.git
+    cd hellotoms
+    ```
+  </Step>
+
+  <Step title="Install Dependencies" icon="package">
+    Install the required packages using your preferred package manager.
+
+    <Tabs>
+      <Tab title="npm" icon="npm">
+        ```bash
+        npm install
+        ```
+      </Tab>
+      <Tab title="yarn" icon="yarn">
+        ```bash
+        yarn install
+        ```
+      </Tab>
+      <Tab title="pnpm" icon="package">
+        ```bash
+        pnpm install
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="Environment Setup" icon="settings">
+    Copy the example environment file and add your details:
+
+    ```bash
+    cp .env.example .env.local
+    ```
+
+    Open `.env.local` and set values like `NEXT_PUBLIC_NAME="Tom Budi"` and your brand color `NEXT_PUBLIC_THEME_COLOR="#c53544"`.
+  </Step>
+</Steps>
+
+## Basic Customization
+
+Customize key sections to match your portfolio.
+
+<Tabs>
+  <Tab title="Hero Section" icon="star">
+    Edit `app/components/Hero.tsx`:
+
+    ```tsx
+    export default function Hero() {
+      return (
+        <section className="hero">
+          <h1>Hi, I&apos;m {process.env.NEXT_PUBLIC_NAME}</h1>
+          <p>Software engineer specializing in web, mobile, and cloud solutions.</p>
+          <div style={{ '--brand-color': '#c53544' } as React.CSSProperties}>
+            <button>Get In Touch</button>
+          </div>
+        </section>
+      );
+    }
+    ```
+  </Tab>
+
+  <Tab title="Projects" icon="folder">
+    Add your projects in `data/projects.json`:
+
+    ```json
+    {
+      "projects": [
+        {
+          "title": "E-Commerce App",
+          "description": "Full-stack Next.js application with Stripe integration.",
+          "technologies": ["Next.js", "Tailwind", "PostgreSQL"],
+          "link": "https://github.com/tomi-budi/ecommerce"
+        }
+      ]
+    }
+    ```
+  </Tab>
+</Tabs>
+
+<Callout kind="tip">
+  Use the brand color `#c53544` for accents. Update CSS variables in `globals.css` for consistency.
+</Callout>
+
+## Preview Your Site
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser. You see your customized HelloToms portfolio live.
+
+<Expandable title="Troubleshooting Common Issues" default-open="false">
+  - **Port in use?** Run `npm run dev -- -p 3001`.
+  - **Dependency errors?** Delete `node_modules` and `package-lock.json`, then reinstall.
+  - **Styles not loading?** Ensure Tailwind CSS is configured in `tailwind.config.js`.
+</Expandable>
+
+## Next Steps
+
+Explore these features to enhance your portfolio.
+
+<Columns cols={3}>
+  <Card title="Advanced Themes" icon="palette" href="/docs/themes">
+    Customize layouts and dark mode support.
+  </Card>
+  <Card title="Deployment" icon="cloud" href="/docs/deploy">
+    Deploy to Vercel or Netlify in one click.
+  </Card>
+  <Card title="SEO Optimization" icon="search" href="/docs/seo">
+    Boost visibility with meta tags and sitemaps.
+  </Card>
+</Columns>

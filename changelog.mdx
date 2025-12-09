@@ -1,0 +1,140 @@
+---
+title: Changelog
+description: Track updates, new features, and improvements in the HelloToms starter kit.
+---
+
+## Overview
+
+Stay current with the latest enhancements to HelloToms, your personal portfolio starter kit built for showcasing web development, mobile apps, and cloud expertise. Review release notes below to see new features, bug fixes, and migration steps. You upgrade easily using standard package managers.
+
+<Columns cols={3}>
+  <Card title="Latest Release" icon="git-branch" href="#v1-2-0">
+    v1.2.0 brings performance boosts and new animations.
+  </Card>
+  <Card title="Upgrade Guide" icon="settings" href="#upgrading">
+    Follow simple steps to update your site.
+  </Card>
+  <Card title="Roadmap" icon="map" href="#roadmap">
+    Preview upcoming features like CMS integration.
+  </Card>
+</Columns>
+
+## Recent Releases
+
+<Update label="2024-10-15" description="v1.2.0" tags={["feature", "improvement"]}>
+
+## New Features
+
+- Added smooth scroll animations for project showcases using Framer Motion.
+- Introduced dark mode toggle with localStorage persistence.
+
+## Improvements
+
+- Optimized image loading with Next.js Image component for `<50%` faster hero sections.
+- Enhanced Tailwind config for better mobile responsiveness.
+
+## Bug Fixes
+
+- Fixed navbar overlap on scroll in Safari browsers.
+- Resolved hydration mismatch errors during SSR.
+
+</Update>
+
+<Update label="2024-09-20" description="v1.1.0" tags={["bugfix", "improvement"]}>
+
+## Improvements
+
+- Upgraded to Tailwind CSS v3.4 for utility-first styling refinements.
+- Improved SEO with dynamic meta tags via Next.js Head.
+
+## Bug Fixes
+
+- Corrected contact form submission using React Hook Form validation.
+- Patched accessibility issues in keyboard navigation for project cards.
+
+</Update>
+
+<Update label="2024-08-01" description="v1.0.0" tags={["feature", "breaking"]}>
+
+## New Features
+
+- Core portfolio layout with sections for About, Projects, Skills, and Contact.
+- Integrated TypeScript for type-safe React components.
+- Added MDX support for blog posts.
+
+## Breaking Changes
+
+- Migrated from CSS modules to Tailwind CSS. Update your styles accordingly.
+
+</Update>
+
+<Callout kind="alert">
+  Review breaking changes before upgrading. Backup your `tailwind.config.js` file.
+</Callout>
+
+## Upgrading
+
+Follow these steps to update HelloToms to the latest version.
+
+<Steps>
+  <Step title="Backup Your Site" icon="save">
+    Commit your current changes to Git.
+
+    ```bash
+    git add .
+    git commit -m "Backup before upgrade"
+    ```
+  </Step>
+  <Step title="Update Dependencies" icon="package">
+    Use your preferred package manager.
+
+    <CodeGroup tabs="npm,yarn,pnpm">
+      ```bash
+      npm install next@latest tailwindcss@latest framer-motion@latest
+      ```
+      ```bash
+      yarn add next@latest tailwindcss@latest framer-motion@latest
+      ```
+      ```bash
+      pnpm add next@latest tailwindcss@latest framer-motion@latest
+      ```
+    </CodeGroup>
+  </Step>
+  <Step title="Run Migrations" icon="play">
+    Execute the upgrade script and restart dev server.
+
+    ```bash
+    npm run migrate
+    npm run dev
+    ```
+  </Step>
+</Steps>
+
+## Roadmap
+
+Explore planned enhancements.
+
+<ExpandableGroup>
+  <Expandable title="Q4 2024: CMS Integration" default-open="true">
+    Add Contentful or Sanity support for dynamic blog posts. Expect headless CMS hooks in v1.3.0.
+  </Expandable>
+  <Expandable title="Q1 2025: Mobile App Showcase">
+    New section for React Native and Flutter projects with live demo embeds.
+  </Expandable>
+  <Expandable title="Performance Goals">
+    Aim for Core Web Vitals scores `<100ms` LCP via advanced caching.
+  </Expandable>
+</ExpandableGroup>
+
+## Contributing
+
+Submit pull requests via GitHub. Focus on features that enhance portfolio usability, like new animations or integrations.
+
+<Tabs>
+  <Tab title="Report Bug" icon="bug">
+    Use the GitHub Issues template with reproduction steps.
+  </Tab>
+  <Tab title="Feature Request" icon="sparkles">
+    Describe use cases, such as cloud deployment presets for Vercel or Netlify.
+  </Tab>
+</Tabs>

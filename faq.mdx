@@ -1,0 +1,159 @@
+---
+title: Frequently Asked Questions
+description: Common questions and answers about using and customizing the HelloToms starter kit.
+---
+
+## Troubleshooting Common Issues
+
+Encounter build errors or deployment problems? Use these steps to diagnose and resolve them quickly.
+
+<ExpandableGroup>
+
+<Expandable title="Build fails with Tailwind CSS errors" default-open="true">
+
+Check your `tailwind.config.js` file for missing paths. Run the following to regenerate styles:
+
+<CodeGroup tabs="npm,yarn,pnpm">
+```bash
+npm run build
+```
+```bash
+yarn build
+```
+```bash
+pnpm build
+```
+</CodeGroup>
+
+If errors persist, clear the cache:
+
+```bash
+rm -rf .next node_modules/.cache
+npm install
+```
+
+</Expandable>
+
+<Expandable title="Deployment preview shows blank page">
+
+Verify your environment variables in the hosting dashboard. Common issue: missing `NEXT_PUBLIC_BASE_PATH`.
+
+<Callout kind="tip">
+Set `NEXT_PUBLIC_BASE_PATH=/your-subpath` in production builds.
+</Callout>
+
+Follow these steps:
+
+<Steps>
+<Step title="Check Environment" icon="settings">
+Review `.env.local` and hosting vars for mismatches.
+</Step>
+<Step title="Rebuild and Redeploy" icon="refresh-cw">
+Trigger a new build in your dashboard.
+</Step>
+<Step title="Inspect Console" icon="bug">
+Open browser dev tools and check for JavaScript errors.
+</Step>
+</Steps>
+
+</Expandable>
+
+<Expandable title="Images not loading on Vercel">
+
+Ensure images are in the `public` folder. Vercel optimizes them automatically, but large files may timeout.
+
+Update your `<Image>` component:
+
+````jsx
+<Image
+  src="/images/portfolio-hero.jpg"
+  alt="Portfolio hero image"
+  width={1200}
+  height={600}
+  priority={true}
+/>
+````
+
+</Expandable>
+
+</ExpandableGroup>
+
+## Hosting Recommendations
+
+Choose a platform that fits your needs. All support Next.js out of the box.
+
+<Columns cols={3}>
+<Card title="Vercel" icon="wind" href="https://vercel.com/new/clone?repository-url=https://github.com/your-repo/hellotoms" target="_blank">
+Fast previews, automatic scaling. Best for portfolios.
+</Card>
+<Card title="Netlify" icon="activity" href="https://app.netlify.com/start/deploy?repository=https://github.com/your-repo/hellotoms" target="_blank">
+Free tier with forms handling. Great for static exports.
+</Card>
+<Card title="Cloudflare Pages" icon="cloud" href="https://dash.cloudflare.com/sign-up/pages" target="_blank">
+Edge caching for global speed. Unlimited bandwidth.
+</Card>
+</Columns>
+
+<Callout kind="success">
+Connect your GitHub repo for automatic deployments on push.
+</Callout>
+
+## Extending Functionality
+
+Customize themes or add features like a contact form.
+
+### Theme Customization
+
+Edit `globals.css` and `tailwind.config.js`:
+
+```javascript
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        primary: '#c53544',
+      },
+    },
+  },
+};
+```
+
+### Adding a Blog
+
+Install MDX support:
+
+<Tabs>
+<Tab title="Next.js App Router" icon="code">
+```bash
+npm install @next/mdx @mdx-js/loader
+```
+Create `app/blog/page.tsx` with dynamic routes.
+</Tab>
+<Tab title="Contentlayer (Recommended)" icon="layers">
+```bash
+npm install contentlayer2 next-contentlayer2
+```
+Define schemas in `contentlayer.config.ts`.
+</Tab>
+</Tabs>
+
+<Callout kind="info">
+Restart dev server after config changes.
+</Callout>
+
+## Support Resources
+
+Get help fast:
+
+- **GitHub Issues**: Report bugs at [github.com/your-repo/hellotoms/issues](https://github.com/your-repo/hellotoms/issues)
+- **Discussions**: Ask questions in [Discussions tab](https://github.com/your-repo/hellotoms/discussions)
+- **Discord**: Join community at discord.gg/hellotoms
+
+<Columns cols={2}>
+<Card title="Documentation" icon="book-open" href="/docs">
+Full guides and examples.
+</Card>
+<Card title="Examples" icon="star" href="/examples">
+Live demos of customizations.
+</Card>
+</Columns>

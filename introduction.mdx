@@ -1,0 +1,118 @@
+---
+title: Welcome to HelloToms
+description: An overview of HelloToms, a personal portfolio starter kit for showcasing software engineering expertise in web development, mobile apps, and cloud solutions.
+---
+
+## Overview
+
+HelloToms is your ready-to-use personal portfolio starter kit. It helps you showcase your software engineering expertise in web development, mobile applications, and cloud solutions. Built with Next.js, Tailwind CSS, and MDX for documentation, HelloToms delivers a professional, responsive site that highlights your projects, skills, and experience. Customize it quickly to reflect your unique brand and launch in minutes.
+
+<Callout kind="info">
+  HelloToms uses MDX for rich, interactive documentation pages like this one.
+</Callout>
+
+## Key Features
+
+HelloToms packs essential features for modern portfolios.
+
+<Columns cols={3}>
+  <Card title="Responsive Design" icon="smartphone" href="/docs/design">
+    Works seamlessly on desktop, tablet, and mobile devices with Tailwind CSS.
+  </Card>
+  <Card title="SEO Optimized" icon="search" href="/docs/seo">
+    Built-in meta tags, sitemaps, and fast loading for better search rankings.
+  </Card>
+  <Card title="Dark Mode" icon="moon" href="/docs/theme">
+    Automatic and toggleable dark mode for enhanced user experience.
+  </Card>
+</Columns>
+
+<Columns cols={2}>
+  <Card title="Project Showcase" icon="folder" href="/docs/projects" horizontal>
+    Display your web apps, mobile projects, and cloud solutions with live demos and case studies.
+  </Card>
+  <Card title="Blog Integration" icon="book-open" href="/docs/blog" horizontal>
+    Add a blog section using MDX to share insights on React, AWS, and more.
+  </Card>
+</Columns>
+
+## Target Audience
+
+HelloToms suits various professionals in software engineering.
+
+| Role              | Benefits                                                                 |
+|-------------------|--------------------------------------------------------------------------|
+| Freelance Developers | Quick setup to win clients with polished project galleries.             |
+| Full-Stack Engineers | Highlight React/Node.js stacks alongside mobile (React Native) and cloud (AWS). |
+| Job Seekers       | SEO features help recruiters find your expertise in web and cloud tech.  |
+| Agency Owners     | Customizable for teams to showcase enterprise solutions.                |
+
+## Brand Guidelines
+
+Follow these guidelines to maintain consistency.
+
+<ExpandableGroup>
+  <Expandable title="Primary Color" default-open="true">
+    Use the brand color `#c53544` for accents, buttons, and links. Pair it with neutral grays for readability.
+  </Expandable>
+  <Expandable title="Typography">
+    Headings use Inter font (bold weights). Body text is Inter Regular at 16px.
+  </Expandable>
+  <Expandable title="Logo Usage">
+    Place the HelloToms logo in the header. Do not stretch or recolor it.
+  </Expandable>
+</ExpandableGroup>
+
+<Callout kind="tip">
+  Test your customizations in dark and light modes to ensure accessibility.
+</Callout>
+
+## Get Started in Minutes
+
+Follow these steps to launch your portfolio.
+
+<Steps>
+  <Step title="Clone and Install" icon="download">
+    Get the starter kit and dependencies.
+
+    <CodeGroup tabs="npm,yarn">
+    ```bash
+    git clone https://github.com/yourusername/hellotoms.git
+    cd hellotoms
+    npm install
+    ```
+    ```bash
+    git clone https://github.com/yourusername/hellotoms.git
+    cd hellotoms
+    yarn install
+    ```
+    </CodeGroup>
+  </Step>
+  <Step title="Customize Content" icon="edit-3">
+    Update `data/projects.json` with your real projects.
+
+    ```json
+    {
+      "projects": [
+        {
+          "title": "E-Commerce App",
+          "tech": ["React", "Node.js", "AWS"],
+          "demo": "https://demo.example.com"
+        }
+      ]
+    }
+    ```
+  </Step>
+  <Step title="Deploy" icon="rocket">
+    Deploy to Vercel or Netlify.
+
+    <Tabs>
+      <Tab title="Vercel" icon="cloud">
+        Connect your GitHub repo and deploy with one click.
+      </Tab>
+      <Tab title="Netlify" icon="globe">
+        Drag your build folder or link GitHub for CI/CD.
+      </Tab>
+    </Tabs>
+  </Step>
+</Steps>

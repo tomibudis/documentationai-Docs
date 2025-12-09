@@ -1,0 +1,156 @@
+---
+title: Building Your Portfolio
+description: A comprehensive guide to creating compelling portfolio sections for web, mobile, and cloud projects.
+---
+
+## Overview
+
+Build a standout portfolio by organizing your web, mobile, and cloud projects into clear, engaging sections. Focus on showcasing your software engineering expertise with structured content that highlights achievements, technologies, and impact. This guide walks you through project showcases, resume integration, contact and about sections, plus best practices to captivate visitors.
+
+<Columns cols={3}>
+  <Card title="Web Projects" icon="globe" href="#">
+    Highlight responsive sites and SPAs built with React and Next.js.
+  </Card>
+  <Card title="Mobile Apps" icon="smartphone" href="#">
+    Feature cross-platform apps using React Native and Flutter.
+  </Card>
+  <Card title="Cloud Solutions" icon="cloud" href="#">
+    Demonstrate scalable deployments on AWS, GCP, and Azure.
+  </Card>
+</Columns>
+
+## Project Showcase Structure
+
+Structure your project sections to grab attention quickly. Start with a hero image or demo, followed by key metrics, tech stack, and a detailed description.
+
+<Steps>
+  <Step title="Select Key Projects" icon="star">
+    Choose 3-5 projects that represent your best work. Prioritize those with measurable impact, like "Increased user engagement by 40%".
+  </Step>
+  <Step title="Add Visuals and Metrics">
+    Include screenshots, GIFs, or live demos. Use bullet points for results:
+
+    - Tech stack: React, Node.js, PostgreSQL
+    - Live demo: [yourapp.com](https://yourapp.com)
+    - GitHub: [repo link](https://github.com/yourusername/project)
+  </Step>
+  <Step title="Write Compelling Descriptions">
+    Describe the problem, your solution, and outcomes in 100-200 words. Emphasize your role and challenges overcome.
+  </Step>
+</Steps>
+
+## Resume Integration
+
+Integrate your resume seamlessly to let visitors download or view it inline. Use embeds for PDFs or structured text sections.
+
+<Tabs>
+  <Tab title="PDF Embed" icon="file">
+    Embed your resume directly:
+
+    ```html
+    <iframe
+      src="/resume-tom-budi.pdf"
+      width="100%"
+      height="800px"
+      title="Tom Budi Resume"
+    />
+    ```
+
+    Host the PDF in your `public` folder for Next.js sites.
+  </Tab>
+  <Tab title="Markdown Sections" icon="file-text">
+    Break it into tabs for quick scanning:
+
+    ```mdx
+    ## Experience
+
+    ### Senior Engineer, TechCorp (2020-Present)
+    - Led full-stack development for e-commerce platform
+    - Optimized APIs reducing latency by 60ms
+    ```
+  </Tab>
+</Tabs>
+
+## Contact and About Sections
+
+Craft personal sections that build trust. The About page tells your story; Contact provides easy outreach options.
+
+<CodeGroup tabs="About Section,Contact Form">
+  ```jsx
+  // About Section (React component)
+  function About() {
+    return (
+      <section>
+        <h2>Hi, I'm Tom Budi</h2>
+        <p>
+          Seasoned engineer specializing in web, mobile, and cloud.
+          Passionate about scalable solutions and clean code.
+        </p>
+        <ul>
+          <li>10+ years experience</li>
+          <li>React Native expert</li>
+          <li>AWS certified</li>
+        </ul>
+      </section>
+    );
+  }
+  ```
+  ```jsx
+  // Contact Form (with validation)
+  function Contact() {
+    const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      await fetch('/api/contact', {
+        method: 'POST',
+        body: JSON.stringify(formData),
+      });
+    };
+
+    return (
+      <form onSubmit={handleSubmit}>
+        <input
+          type="email"
+          placeholder="your@email.com"
+          value={formData.email}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          required
+        />
+        <textarea placeholder="Your message" required />
+        <button type="submit">Send Message</button>
+      </form>
+    );
+  }
+  ```
+</CodeGroup>
+
+## Best Practices for Content
+
+Follow these practices to make your portfolio professional and user-friendly.
+
+| Practice | Do | Don't |
+|----------|----|-------|
+| **Content Length** | Keep descriptions concise (150 words max per project) | Write walls of text |
+| **Visuals** | Use high-res screenshots and videos | Rely on text alone |
+| **SEO** | Add meta titles like "Tom Budi - Web Developer Portfolio" | Ignore search optimization |
+| **Accessibility** | Use alt text: `alt="Project dashboard screenshot"` | Skip ARIA labels |
+| **Mobile-First** | Test responsiveness with `<1000px` viewports | Design for desktop only |
+
+<Callout kind="tip">
+  Update your portfolio quarterly. Track analytics to see which projects get most views and refine accordingly.
+</Callout>
+
+<Expandable title="Advanced Customization" default-open="false">
+  For dynamic portfolios, integrate a CMS like Contentful:
+
+  ```javascript
+  // Fetch projects from API
+  const projects = await fetch('/api/projects').then(res => res.json());
+  projects.forEach(project => {
+    // Render dynamically
+  });
+  ```
+
+  Use Tailwind CSS for styling: `className="bg-gradient-to-r from-[#c53544] to-red-600"`.
+</Expandable>

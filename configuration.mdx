@@ -1,0 +1,157 @@
+---
+title: Site Configuration
+description: Learn how to configure and personalize your HelloToms portfolio to reflect your unique work and style.
+---
+
+## Overview
+
+Customize HelloToms to match your brand and showcase your projects effectively. Adjust themes, colors, content, navigation, and deployment settings through simple configuration files and editable sections. Start with the basics and scale to advanced customizations.
+
+<Columns cols={3}>
+  <Card title="Theme Settings" icon="palette" href="#theme-settings">
+    Change colors and layouts quickly.
+  </Card>
+  <Card title="Content Editing" icon="edit-3" href="#content-editing">
+    Update your bio, projects, and blog.
+  </Card>
+  <Card title="Deployment" icon="upload-cloud" href="#deployment">
+    Host on your preferred platform.
+  </Card>
+</Columns>
+
+## Theme and Color Settings
+
+Modify the site's appearance in `src/config/theme.json`. Set your primary color to `#c53544` for the HelloToms brand.
+
+<CodeGroup tabs="JSON,YAML">
+```json
+{
+  "primaryColor": "#c53544",
+  "secondaryColor": "#2d3748",
+  "fontFamily": "Inter, sans-serif",
+  "theme": "dark"
+}
+```
+
+```yaml
+primaryColor: "#c53544"
+secondaryColor: "#2d3748"
+fontFamily: "Inter, sans-serif"
+theme: dark
+```
+</CodeGroup>
+
+<Callout kind="tip">
+Test color changes locally with `npm run dev` before deploying.
+</Callout>
+
+<Steps>
+  <Step title="Update Theme File" icon="edit">
+    Open `src/config/theme.json` and replace the `primaryColor` value.
+  </Step>
+  <Step title="Restart Server" icon="refresh-cw">
+    Run `npm run dev` to preview changes.
+  </Step>
+  <Step title="Verify" icon="check-circle">
+    Check the navbar and buttons for your new color.
+  </Step>
+</Steps>
+
+## Content Editing
+
+Edit Markdown files in `src/content/` to personalize sections. Use frontmatter for metadata like titles and dates.
+
+<Tabs>
+  <Tab title="Projects" icon="folder">
+    Update `src/content/projects/my-project.mdx`:
+
+````mdx
+---
+title: "E-commerce App"
+description: "Built with Next.js and Stripe"
+tech: ["Next.js", "Tailwind", "Stripe"]
+---
+
+Redesigned checkout flow reducing cart abandonment by 30%.
+````
+
+  </Tab>
+  <Tab title="Bio" icon="user">
+    Modify `src/content/about.mdx`:
+
+````mdx
+---
+title: "Tom Budi"
+role: "Senior Software Engineer"
+---
+
+10+ years in web and mobile development.
+````
+
+  </Tab>
+</Tabs>
+
+## Navigation Setup
+
+Configure the header and footer menus in `src/config/navigation.json`. Add or reorder links to match your structure.
+
+```json
+{
+  "header": [
+    { "label": "Home", "href": "/" },
+    { "label": "Projects", "href": "/projects" },
+    { "label": "Blog", "href": "/blog" },
+    { "label": "Contact", "href": "/contact" }
+  ],
+  "footer": [
+    { "label": "GitHub", "href": "https://github.com/tombudi" }
+  ]
+}
+```
+
+<Expandable title="Advanced: Custom Icons" default-open="false">
+Add Lucide icons to nav items:
+
+```json
+{ "label": "Projects", "href": "/projects", "icon": "code" }
+```
+</Expandable>
+
+## Deployment Options
+
+Deploy HelloToms to modern platforms. Follow these platform-specific steps.
+
+<Tabs>
+  <Tab title="Vercel" icon="zap">
+    <Steps>
+      <Step title="Connect Repo">
+        Push to GitHub, then import in Vercel dashboard.
+      </Step>
+      <Step title="Set Build">
+        Build command: `npm run build`<br/>Output: `dist`
+      </Step>
+    </Steps>
+  </Tab>
+  <Tab title="Netlify" icon="cloud">
+    <Steps>
+      <Step title="Drag & Drop">
+        Drag `dist` folder to Netlify deploy page.
+      </Step>
+      <Step title="Auto Deploy">
+        Connect GitHub repo for continuous deployment.
+      </Step>
+    </Steps>
+  </Tab>
+  <Tab title="GitHub Pages" icon="github">
+    ```bash
+    npm run build
+    git subtree push --prefix dist origin gh-pages
+    ```
+  </Tab>
+</Tabs>
+
+<Callout kind="alert">
+Always commit changes and push to your repository before deploying.
+</Callout>
+
+These configurations make your portfolio uniquely yours. Experiment locally, then deploy confidently.
