@@ -1,16 +1,18 @@
 ---
-title: Quickstart Guide
-description: Get your HelloToms portfolio up and running in minutes with step-by-step setup instructions.
+title: About me
+description: >-
+  Get your HelloToms portfolio up and running in minutes with step-by-step setup
+  instructions.
 ---
-
 ## Prerequisites
 
 Before starting, ensure you have the following installed:
 
 - Node.js version `>=18.0.0`
+
 - Git
 
-<Callout kind="info">
+<Callout kind="info" collapsed="false">
   Verify your Node.js version by running `node -v` in your terminal. Download the latest LTS version from [nodejs.org](https://nodejs.org) if needed.
 </Callout>
 
@@ -19,7 +21,7 @@ Before starting, ensure you have the following installed:
 Follow these steps to set up HelloToms locally.
 
 <Steps>
-  <Step title="Clone the Repository" icon="git-pull-request">
+  <Step title="Clone the Repository" icon="git-pull-request" title-type="p">
     Open your terminal and clone the HelloToms repository:
 
     ```bash
@@ -28,7 +30,7 @@ Follow these steps to set up HelloToms locally.
     ```
   </Step>
 
-  <Step title="Install Dependencies" icon="package">
+  <Step title="Install Dependencies" icon="package" title-type="p">
     Install the required packages using your preferred package manager.
 
     <Tabs>
@@ -37,11 +39,13 @@ Follow these steps to set up HelloToms locally.
         npm install
         ```
       </Tab>
+
       <Tab title="yarn" icon="yarn">
         ```bash
         yarn install
         ```
       </Tab>
+
       <Tab title="pnpm" icon="package">
         ```bash
         pnpm install
@@ -50,7 +54,7 @@ Follow these steps to set up HelloToms locally.
     </Tabs>
   </Step>
 
-  <Step title="Environment Setup" icon="settings">
+  <Step title="Environment Setup" icon="settings" title-type="p">
     Copy the example environment file and add your details:
 
     ```bash
@@ -102,7 +106,7 @@ Customize key sections to match your portfolio.
   </Tab>
 </Tabs>
 
-<Callout kind="tip">
+<Callout kind="tip" collapsed="false">
   Use the brand color `#c53544` for accents. Update CSS variables in `globals.css` for consistency.
 </Callout>
 
@@ -118,7 +122,9 @@ Open [http://localhost:3000](http://localhost:3000) in your browser. You see you
 
 <Expandable title="Troubleshooting Common Issues" default-open="false">
   - **Port in use?** Run `npm run dev -- -p 3001`.
+
   - **Dependency errors?** Delete `node_modules` and `package-lock.json`, then reinstall.
+
   - **Styles not loading?** Ensure Tailwind CSS is configured in `tailwind.config.js`.
 </Expandable>
 
@@ -126,14 +132,17 @@ Open [http://localhost:3000](http://localhost:3000) in your browser. You see you
 
 Explore these features to enhance your portfolio.
 
-<Columns cols={3}>
-  <Card title="Advanced Themes" icon="palette" href="/docs/themes">
+<Columns cols="3">
+  <Card title="Advanced Themes" href="/docs/themes" icon="palette" horizontal="false">
     Customize layouts and dark mode support.
   </Card>
-  <Card title="Deployment" icon="cloud" href="/docs/deploy">
+
+  <Card title="Deployment" href="/docs/deploy" icon="cloud" horizontal="false">
     Deploy to Vercel or Netlify in one click.
   </Card>
-  <Card title="SEO Optimization" icon="search" href="/docs/seo">
+
+  <Card title="SEO Optimization" href="/docs/seo" icon="search" horizontal="false">
     Boost visibility with meta tags and sitemaps.
   </Card>
 </Columns>
+
