@@ -1,0 +1,799 @@
+---
+title: Simplify TanStack Query with Orval
+description: >-
+  A comprehensive guide to automating API client generation and reducing
+  boilerplate code in React applications using Orval and OpenAPI specifications.
+---
+## Table of Contents
+
+1. [Problem](#problem)
+
+2. [Solution](#solution)
+
+3. [Detail Approach (Real World Case)](#detail-approach-real-world-case)
+
+4. [Traditional Way vs Orval](#traditional-way-vs-orval)
+
+5. [When to Use This Approach](#when-to-use-this-approach)
+
+6. [Conclusion](#conclusion)
+
+---
+
+## Problem
+
+### Current State: Manual Query Hook Creation
+
+In modern React applications using TanStack Query, developers face significant challenges when managing API integrations:
+
+#### 1. **Repetitive Boilerplate Code**
+
+For every API endpoint, developers must manually create:
+
+- Query hooks (`useQuery`, `useInfiniteQuery`)
+
+- Mutation hooks (`useMutation`)
+
+- TypeScript type definitions
+
+- Query key factories
+
+- Error handling logic
+
+- Response transformation
+
+**Example from our codebase:**
+
+```typescript
+// src/hooks/queries/use-get-reports.query.ts
+import { useInfiniteQuery } from '@tanstack/react-query';
+import api from '@/lib/axios';
+import { notifyError } from '@/lib/notify';
+import type { ReportQueryParams, ReportsListResponse } from '@/types/api';
+
+export function useGetReports(params?: ReportQueryParams) {
+  const { page: initialPage = 1, ...restParams } = params ?? {};
+
+  return useInfiniteQuery({
+    queryKey: ['reports', restParams],
+    initialPageParam: initialPage,
+    retry: false,
+    queryFn: async ({ pageParam = initialPage }): Promise<ReportsListResponse> => {
+      try {
+        const response = await api.get<ReportsListResponse>('/reports', {
+          params: {
+            ...restParams,
+            page: pageParam,
+          },
+        });
+        return response.data;
+      } catch (error) {
+        notifyError('Failed to fetch reports');
+        throw error;
+      }
+    },
+    getNextPageParam: (lastPage) => {
+      const { page, totalPages } = lastPage.data;
+      return page < totalPages ? page + 1 : undefined;
+    },
+    getPreviousPageParam: (firstPage) => {
+      const { page } = firstPage.data;
+      return page > 1 ? page - 1 : undefined;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+}
+```
+
+#### 2. **Type Safety Issues**
+
+- Manual type definitions can drift from backend API contracts
+
+- No automatic synchronization with backend changes
+
+- Risk of runtime errors due to type mismatches
+
+- Duplicate type definitions across frontend and backend
+
+#### 3. **Maintenance Burden**
+
+- **19 query hooks** manually created and maintained
+
+- **13 mutation hooks** with repetitive patterns
+
+- When backend API changes, frontend code must be manually updated
+
+- High risk of inconsistencies and bugs
+
+- Time-consuming refactoring when API evolves
+
+#### 4. **Scalability Challenges**
+
+- As the application grows, the number of hooks increases linearly
+
+- Each new endpoint requires 30-50 lines of boilerplate code
+
+- Difficult to maintain consistency across all hooks
+
+- Code review becomes tedious with repetitive patterns
+
+#### 5. **Developer Experience**
+
+- Slower development velocity
+
+- More prone to human error
+
+- Difficult onboarding for new developers
+
+- Lack of single source of truth for API contracts
+
+---
+
+## Solution
+
+### Orval: Automated API Client Generation
+
+**Orval** is a powerful tool that automatically generates TypeScript API clients and TanStack Query hooks from OpenAPI/Swagger specifications. It eliminates manual boilerplate and ensures type safety.
+
+#### Key Benefits
+
+1. **Zero Boilerplate**: Automatically generates hooks for all endpoints
+
+2. **Type Safety**: Types are generated from OpenAPI spec, ensuring consistency
+
+3. **Auto-Sync**: Regenerate when API changes
+
+4. **Consistency**: All hooks follow the same patterns
+
+5. **Developer Experience**: Focus on business logic, not API plumbing
+
+#### How It Works
+
+```
+OpenAPI/Swagger Spec → Orval → Generated Hooks + Types
+```
+
+Orval reads your OpenAPI specification and generates:
+
+- TypeScript types for requests and responses
+
+- Query hooks (`useQuery`, `useInfiniteQuery`)
+
+- Mutation hooks (`useMutation`)
+
+- Query key factories
+
+- API client functions
+
+---
+
+## Detail Approach (Real World Case)
+
+### Step 1: Installation
+
+```bash
+npm install -D orval
+```
+
+### Step 2: Create Orval Configuration
+
+Create `orval.config.ts` in the project root:
+
+```typescript
+import { defineConfig } from 'orval';
+
+export default defineConfig({
+  sipatroli: {
+    input: {
+      // Point to your Swagger/OpenAPI spec
+      // Option 1: Local file
+      target: './openapi.json',
+      
+      // Option 2: Remote URL (from your NestJS Swagger)
+      target: 'http://localhost:3000/api/docs-json',
+    },
+    output: {
+      // Output mode: split by tags for better organization
+      mode: 'tags-split',
+      
+      // Generated hooks file
+      target: 'src/api/generated/hooks.ts',
+      
+      // Generated types/models directory
+      schemas: 'src/api/generated/models',
+      
+      // Client type: react-query for TanStack Query
+      client: 'react-query',
+      
+      // Use your existing axios instance
+      override: {
+        mutator: {
+          path: 'src/lib/axios-instance.ts',
+          name: 'customInstance',
+        },
+        query: {
+          // Enable infinite queries for paginated endpoints
+          useQuery: true,
+          useInfinite: true,
+          useInfiniteQueryParam: 'page',
+          
+          // Default query options
+          options: {
+            staleTime: 1000 * 60 * 5, // 5 minutes
+            retry: false,
+          },
+        },
+      },
+    },
+  },
+});
+```
+
+### Step 3: Create Custom Axios Instance Wrapper
+
+Create `src/lib/axios-instance.ts` to integrate with your existing axios setup:
+
+```typescript
+import api from './axios';
+import type { AxiosRequestConfig } from 'axios';
+
+// Orval expects a function that returns a promise
+export const customInstance = async <T>(
+  config: AxiosRequestConfig,
+): Promise<T> => {
+  const response = await api.request<T>(config);
+  return response.data; // Return data directly (not response object)
+};
+
+export default customInstance;
+```
+
+### Step 4: Generate OpenAPI Specification
+
+If your backend uses NestJS with Swagger (which it does), you can:
+
+**Option A: Export from running server**
+
+```bash
+# Start your backend server
+cd ../sipatroli-api
+npm run start:dev
+
+# In another terminal, fetch the OpenAPI spec
+curl http://localhost:3000/api/docs-json > openapi.json
+```
+
+**Option B: Generate during build**
+
+Add to your backend `package.json`:
+
+```json
+{
+  "scripts": {
+    "generate:openapi": "node scripts/generate-openapi.js"
+  }
+}
+```
+
+### Step 5: Add Generation Script
+
+Add to `package.json`:
+
+```json
+{
+  "scripts": {
+    "generate:api": "orval",
+    "generate:api:watch": "orval --watch"
+  }
+}
+```
+
+### Step 6: Generate Hooks
+
+```bash
+npm run generate:api
+```
+
+This will generate:
+
+- `src/api/generated/hooks.ts` - All query and mutation hooks
+
+- `src/api/generated/models/` - TypeScript types
+
+### Step 7: Usage Example
+
+**Before (Manual):**
+
+```typescript
+// src/hooks/queries/use-get-reports.query.ts
+import { useInfiniteQuery } from '@tanstack/react-query';
+import api from '@/lib/axios';
+import { notifyError } from '@/lib/notify';
+import type { ReportQueryParams, ReportsListResponse } from '@/types/api';
+
+export function useGetReports(params?: ReportQueryParams) {
+  const { page: initialPage = 1, ...restParams } = params ?? {};
+
+  return useInfiniteQuery({
+    queryKey: ['reports', restParams],
+    initialPageParam: initialPage,
+    retry: false,
+    queryFn: async ({ pageParam = initialPage }): Promise<ReportsListResponse> => {
+      try {
+        const response = await api.get<ReportsListResponse>('/reports', {
+          params: {
+            ...restParams,
+            page: pageParam,
+          },
+        });
+        return response.data;
+      } catch (error) {
+        notifyError('Failed to fetch reports');
+        throw error;
+      }
+    },
+    getNextPageParam: (lastPage) => {
+      const { page, totalPages } = lastPage.data;
+      return page < totalPages ? page + 1 : undefined;
+    },
+    getPreviousPageParam: (firstPage) => {
+      const { page } = firstPage.data;
+      return page > 1 ? page - 1 : undefined;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+}
+```
+
+**After (Orval Generated):**
+
+```typescript
+// Generated automatically - no manual code needed!
+import { useGetReports } from '@/api/generated/hooks';
+
+// In your component
+function ReportsPage() {
+  const { data, isLoading, fetchNextPage, hasNextPage } = useGetReports(
+    { page: 1, limit: 10 },
+    {
+      query: {
+        staleTime: 1000 * 60 * 5,
+      },
+    },
+  );
+
+  // Use the data...
+}
+```
+
+### Step 8: Advanced Configuration
+
+#### Custom Error Handling
+
+You can extend the generated hooks with custom error handling:
+
+```typescript
+// src/api/generated/hooks.ts (after generation, you can extend)
+import { notifyError } from '@/lib/notify';
+
+// Wrap generated hooks
+export function useGetReportsWithErrorHandling(params?: ReportQueryParams) {
+  const query = useGetReports(params, {
+    query: {
+      onError: (error) => {
+        notifyError('Failed to fetch reports');
+      },
+    },
+  });
+  
+  return query;
+}
+```
+
+#### Mutation with Cache Invalidation
+
+```typescript
+// Generated mutation hook
+import { usePostDriver, useGetDrivers } from '@/api/generated/hooks';
+import { useQueryClient } from '@tanstack/react-query';
+
+function CreateDriverForm() {
+  const queryClient = useQueryClient();
+  
+  const mutation = usePostDriver({
+    mutation: {
+      onSuccess: () => {
+        // Invalidate and refetch
+        queryClient.invalidateQueries({ 
+          queryKey: useGetDrivers.getKey() 
+        });
+        notifySuccess('Driver created successfully');
+      },
+      onError: () => {
+        notifyError('Failed to create driver');
+      },
+    },
+  });
+
+  const handleSubmit = (data: CreateDriverPayload) => {
+    mutation.mutate(data);
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* form fields */}
+    </form>
+  );
+}
+```
+
+### Step 9: Integration with Existing Code
+
+#### Gradual Migration Strategy
+
+1. **Keep existing hooks** during transition
+
+2. **Generate new hooks** for new endpoints
+
+3. **Migrate old hooks** one by one
+
+4. **Remove manual hooks** once verified
+
+#### Type Migration
+
+```typescript
+// Before: Manual types in src/types/api.ts
+export interface Report {
+  id: string;
+  licensePlate: string | null;
+  // ...
+}
+
+// After: Generated types from OpenAPI
+import type { Report } from '@/api/generated/models';
+// Types are automatically synced with backend!
+```
+
+### Step 10: CI/CD Integration
+
+Add to your CI pipeline:
+
+```yaml
+# .github/workflows/ci.yml
+- name: Generate API Client
+  run: npm run generate:api
+
+- name: Check for changes
+  run: |
+    git diff --exit-code src/api/generated/ || \
+    (echo "API client is out of sync. Run 'npm run generate:api'" && exit 1)
+```
+
+---
+
+## Traditional Way vs Orval
+
+### Comparison Table
+
+| Aspect                | Traditional Way              | Orval Approach             |
+| --------------------- | ---------------------------- | -------------------------- |
+| **Lines of Code**     | \~40-50 per endpoint         | 0 (generated)              |
+| **Type Safety**       | Manual, error-prone          | Automatic from OpenAPI     |
+| **API Sync**          | Manual updates required      | Auto-regenerate            |
+| **Consistency**       | Varies by developer          | Guaranteed consistency     |
+| **Maintenance**       | High (32+ files to maintain) | Low (config file only)     |
+| **Development Speed** | Slow (write boilerplate)     | Fast (use generated hooks) |
+| **Error Risk**        | High (manual errors)         | Low (generated code)       |
+| **Onboarding**        | Learn patterns               | Use generated hooks        |
+| **Refactoring**       | Update all hooks manually    | Regenerate once            |
+
+### Code Comparison
+
+#### Query Hook
+
+**Traditional (37 lines):**
+
+```typescript
+import { useInfiniteQuery } from '@tanstack/react-query';
+import api from '@/lib/axios';
+import { notifyError } from '@/lib/notify';
+import type { ReportQueryParams, ReportsListResponse } from '@/types/api';
+
+export function useGetReports(params?: ReportQueryParams) {
+  const { page: initialPage = 1, ...restParams } = params ?? {};
+
+  return useInfiniteQuery({
+    queryKey: ['reports', restParams],
+    initialPageParam: initialPage,
+    retry: false,
+    queryFn: async ({ pageParam = initialPage }): Promise<ReportsListResponse> => {
+      try {
+        const response = await api.get<ReportsListResponse>('/reports', {
+          params: {
+            ...restParams,
+            page: pageParam,
+          },
+        });
+        return response.data;
+      } catch (error) {
+        notifyError('Failed to fetch reports');
+        throw error;
+      }
+    },
+    getNextPageParam: (lastPage) => {
+      const { page, totalPages } = lastPage.data;
+      return page < totalPages ? page + 1 : undefined;
+    },
+    getPreviousPageParam: (firstPage) => {
+      const { page } = firstPage.data;
+      return page > 1 ? page - 1 : undefined;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+}
+```
+
+**Orval Generated (0 lines - just use it):**
+
+```typescript
+import { useGetReports } from '@/api/generated/hooks';
+
+// Usage
+const { data, isLoading } = useGetReports({ page: 1, limit: 10 });
+```
+
+#### Mutation Hook
+
+**Traditional (24 lines):**
+
+```typescript
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import api from '@/lib/axios';
+import { notifyError, notifySuccess } from '@/lib/notify';
+import type { CreateDriverPayload, Driver } from '@/types/api';
+
+export function usePostDriver() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: CreateDriverPayload): Promise<Driver> => {
+      try {
+        const response = await api.post<Driver>('/driver', payload);
+        return response.data;
+      } catch (error) {
+        notifyError('Failed to create driver');
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['drivers'] });
+      notifySuccess('Driver created successfully');
+    },
+  });
+}
+```
+
+**Orval Generated (with customization):**
+
+```typescript
+import { usePostDriver } from '@/api/generated/hooks';
+import { useQueryClient } from '@tanstack/react-query';
+import { notifyError, notifySuccess } from '@/lib/notify';
+
+function useCreateDriver() {
+  const queryClient = useQueryClient();
+  
+  return usePostDriver({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['drivers'] });
+        notifySuccess('Driver created successfully');
+      },
+      onError: () => {
+        notifyError('Failed to create driver');
+      },
+    },
+  });
+}
+```
+
+### Real-World Impact
+
+**Current Codebase:**
+
+- 19 query hooks × \~40 lines = **760 lines**
+
+- 13 mutation hooks × \~25 lines = **325 lines**
+
+- Type definitions = **\~500 lines**
+
+- **Total: \~1,585 lines of boilerplate**
+
+**With Orval:**
+
+- Configuration file = **\~50 lines**
+
+- Generated code (not committed) = **\~2,000 lines** (auto-maintained)
+
+- **Total manual code: \~50 lines**
+
+**Time Savings:**
+
+- Initial setup: 2-3 hours
+
+- Per endpoint: 15-30 minutes → 0 minutes
+
+- API changes: 30-60 minutes → 2 minutes (regenerate)
+
+- **Annual savings: 40-80 hours** for a medium-sized project
+
+---
+
+## When to Use This Approach
+
+### ✅ Ideal Use Cases
+
+1. **Backend with OpenAPI/Swagger Documentation**
+
+   - NestJS, Express with Swagger, FastAPI, etc.
+
+   - Ensures single source of truth
+
+2. **Large API Surface**
+
+   - 10+ endpoints
+
+   - Multiple teams working on API
+
+   - Frequent API changes
+
+3. **Type Safety Requirements**
+
+   - Critical for data integrity
+
+   - Large team collaboration
+
+   - Long-term maintenance
+
+4. **Rapid Development**
+
+   - Need to iterate quickly
+
+   - Multiple features in parallel
+
+   - Fast time-to-market
+
+5. **Consistency Matters**
+
+   - Standardized patterns across all endpoints
+
+   - Code review efficiency
+
+   - Onboarding new developers
+
+### ⚠️ Consider Alternatives When
+
+1. **No OpenAPI Specification**
+
+   - Backend doesn't provide OpenAPI/Swagger
+
+   - Would need to manually create spec (defeats purpose)
+
+2. **Very Small API**
+
+   - \< 5 endpoints
+
+   - Simple CRUD operations
+
+   - Overhead might not be worth it
+
+3. **Highly Custom Requirements**
+
+   - Every endpoint needs unique handling
+
+   - Complex transformations
+
+   - Non-standard patterns
+
+4. **Legacy Codebase**
+
+   - Existing patterns deeply embedded
+
+   - High migration cost
+
+   - Team resistance to change
+
+5. **Prototype/MVP Stage**
+
+   - API is rapidly changing
+
+   - Spec might not be stable
+
+   - Quick experimentation needed
+
+### 🎯 Decision Matrix
+
+| Scenario                           | Recommendation                             |
+| ---------------------------------- | ------------------------------------------ |
+| 20+ endpoints, OpenAPI available   | ✅ **Strongly Recommended**                 |
+| 10-20 endpoints, OpenAPI available | ✅ **Recommended**                          |
+| 5-10 endpoints, OpenAPI available  | ⚠️ **Consider** (if growing)               |
+| \< 5 endpoints                     | ❌ **Not necessary**                        |
+| No OpenAPI spec                    | ❌ **Not feasible** (create spec first)     |
+| Highly custom patterns             | ⚠️ **Evaluate** (might need customization) |
+
+### 💡 Hybrid Approach
+
+You can use Orval for standard endpoints and keep manual hooks for special cases:
+
+```typescript
+// Generated hooks for standard CRUD
+import { useGetUsers, usePostUser } from '@/api/generated/hooks';
+
+// Manual hook for complex custom logic
+import { useCustomComplexQuery } from '@/hooks/queries/custom';
+```
+
+---
+
+## Conclusion
+
+### Summary
+
+Orval transforms the developer experience by:
+
+1. **Eliminating Boilerplate**: Reduces 1,500+ lines of repetitive code to a simple configuration
+
+2. **Ensuring Type Safety**: Automatic type generation from OpenAPI keeps frontend and backend in sync
+
+3. **Accelerating Development**: Focus on business logic, not API plumbing
+
+4. **Reducing Errors**: Generated code is consistent and tested
+
+5. **Improving Maintainability**: Single source of truth (OpenAPI spec) for API contracts
+
+### Key Takeaways
+
+✅ **Use Orval when:**
+
+- You have OpenAPI/Swagger documentation
+
+- You have 10+ API endpoints
+
+- Type safety and consistency matter
+
+- You want to move faster
+
+❌ **Skip Orval when:**
+
+- No OpenAPI specification available
+
+- Very small API (\< 5 endpoints)
+
+- Highly custom requirements for every endpoint
+
+### Next Steps
+
+1. **Evaluate Your API**: Check if you have OpenAPI/Swagger documentation
+
+2. **Start Small**: Generate hooks for a few endpoints first
+
+3. **Gradual Migration**: Replace manual hooks incrementally
+
+4. **Automate**: Add generation to CI/CD pipeline
+
+5. **Document**: Share this approach with your team
+
+### Resources
+
+- [Orval Documentation](https://orval.dev/)
+
+- [OpenAPI Specification](https://swagger.io/specification/)
+
+- [TanStack Query Documentation](https://tanstack.com/query/latest)
+
+---
+
+**Happy Coding! 🚀**
+
+*This documentation was created to help developers understand and implement Orval in their React + TanStack Query projects. Feel free to adapt it to your specific needs.*

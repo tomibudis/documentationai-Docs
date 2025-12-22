@@ -1,0 +1,378 @@
+---
+title: 'Building Your Own MCP Server: A Practical Guide from LearnFlo API'
+description: >-
+  Unlock the power of standardized AI-API communication — Learn how to create a
+  Model Context Protocol (MCP) server that bridges the gap between AI models and
+  diverse APIs, enabling seamless integration and reducing development
+  complexity.
+---
+## Problem Section
+
+### The Integration Challenge
+
+In today's AI-driven development landscape, integrating AI systems with various APIs presents significant challenges:
+
+- **Protocol Fragmentation**: Different APIs use varying protocols, data structures, and authentication methods, making it difficult for AI models to interact with them consistently
+
+- **Lack of Standardization**: Without a standardized approach, developers must create custom integration logic for each API, leading to code duplication and maintenance overhead
+
+- **Complexity Overhead**: Each new API integration requires understanding its unique structure, error handling, and response formats, increasing development time and potential for errors
+
+- **Scalability Issues**: As the number of integrations grows, maintaining multiple custom implementations becomes increasingly difficult and error-prone
+
+- **Context Loss**: AI models struggle to maintain context across different API interactions when there's no unified protocol for communication
+
+### Real-World Impact
+
+These challenges manifest in:
+
+- Increased development time for each new API integration
+
+- Higher bug rates due to inconsistent error handling
+
+- Difficulties in testing and debugging cross-API interactions
+
+- Reduced reusability of integration code
+
+- Challenges in maintaining and updating multiple API connectors
+
+## Solution Section
+
+### The MCP Approach
+
+The **Model Context Protocol (MCP)** provides a standardized framework for building servers that enable AI models to interact with various APIs in a consistent, maintainable way. The [learnflo-mcp-be-api](https://github.com/tomibudis/learnflo-mcp-be-api) repository demonstrates a practical implementation approach using **NestJS**, a modern Node.js framework.
+
+### Key Benefits
+
+- **Standardized Communication**: MCP servers provide a unified interface for AI models to interact with different APIs
+
+- **Reduced Complexity**: Developers can focus on business logic rather than protocol-specific implementation details
+
+- **Improved Maintainability**: Centralized protocol handling makes updates and bug fixes easier
+
+- **Enhanced Scalability**: New API integrations follow the same pattern, reducing onboarding time
+
+- **Better Testing**: Standardized interfaces make it easier to write comprehensive tests
+
+- **Type Safety**: TypeScript implementation ensures compile-time error detection
+
+### Technology Stack
+
+The LearnFlo approach leverages:
+
+- **NestJS**: Enterprise-grade Node.js framework with built-in support for modular architecture
+
+- **TypeScript**: Type-safe development with excellent IDE support
+
+- **Swagger/OpenAPI**: Auto-generated API documentation
+
+- **Clean Architecture**: SOLID principles and separation of concerns
+
+- **PostgreSQL**: Reliable relational database for persistent data
+
+## Detail Approach
+
+### 1. Project Structure & Architecture
+
+The repository follows a clean, modular architecture pattern:
+
+```
+src/
+├── common/                 # Shared code across modules
+│   ├── dto/               # Common Data Transfer Objects
+│   ├── decorators/        # Custom decorators (Public, CurrentUser)
+│   ├── filters/           # Exception filters
+│   ├── guards/            # Authentication guards
+│   ├── interceptors/      # Logging and transform interceptors
+│   ├── interfaces/        # TypeScript interfaces
+│   └── pipes/             # Validation pipes
+├── config/                # Configuration modules
+│   ├── app.config.ts
+│   ├── database.config.ts
+│   └── jwt.config.ts
+├── database/              # Database configuration
+├── modules/               # Feature modules
+│   ├── health/            # Health check endpoints
+│   ├── users/             # User management
+│   └── [other modules]    # Additional features
+├── app.module.ts          # Main application module
+└── main.ts               # Application entry point
+```
+
+**Key Principles:**
+
+- **Modular Design**: Each feature is self-contained in its own module
+
+- **Separation of Concerns**: Clear boundaries between controllers, services, and data access
+
+- **Reusability**: Common functionality extracted to shared modules
+
+- **Testability**: Structure supports unit and integration testing
+
+### 2. Core Implementation Steps
+
+#### Step 1: Project Initialization
+
+```bash
+# Create NestJS project
+nest new learnflo-mcp-be-api
+
+# Install core dependencies
+npm install @nestjs/common @nestjs/core @nestjs/config
+npm install @nestjs/swagger @nestjs/typeorm typeorm
+npm install class-validator class-transformer
+```
+
+#### Step 2: Configuration Management
+
+Create environment-based configuration using `@nestjs/config`:
+
+```typescript
+// config/app.config.ts
+export default () => ({
+  app: {
+    name: process.env.APP_NAME || 'LearnFlo API',
+    version: process.env.APP_VERSION || '1.0.0',
+    port: parseInt(process.env.PORT, 10) || 3000,
+    apiPrefix: process.env.API_PREFIX || 'api/v1',
+  },
+});
+```
+
+#### Step 3: Common Module Setup
+
+Establish shared utilities and patterns:
+
+- **DTOs**: Standardize request/response structures
+
+- **Decorators**: Create custom decorators for common operations
+
+- **Filters**: Centralize exception handling
+
+- **Guards**: Implement authentication and authorization
+
+- **Interceptors**: Add logging and response transformation
+
+- **Pipes**: Validate incoming requests
+
+#### Step 4: Module Development Pattern
+
+For each feature module, follow this structure:
+
+```typescript
+// users/users.module.ts
+@Module({
+  imports: [TypeOrmModule.forFeature([User])],
+  controllers: [UsersController],
+  providers: [UsersService],
+  exports: [UsersService],
+})
+export class UsersModule {}
+```
+
+**Module Components:**
+
+- **Controller**: Handles HTTP requests and responses
+
+- **Service**: Contains business logic
+
+- **DTOs**: Define data structures for validation
+
+- **Entities**: Database models (if using TypeORM)
+
+- **Types**: TypeScript interfaces and types
+
+#### Step 5: API Documentation
+
+Integrate Swagger for auto-generated documentation:
+
+```typescript
+// main.ts
+const config = new DocumentBuilder()
+  .setTitle('LearnFlo API')
+  .setDescription('MCP Server API Documentation')
+  .setVersion('1.0.0')
+  .addBearerAuth()
+  .build();
+
+const document = SwaggerModule.createDocument(app, config);
+SwaggerModule.setup('api/docs', app, document);
+```
+
+### 3. Key Documentation Files
+
+The repository includes comprehensive documentation:
+
+#### API\_DOCUMENTATION.md
+
+- **Purpose**: Outlines all API endpoints, their functionalities, and usage guidelines
+
+- **Content**: Request/response formats, authentication requirements, error codes
+
+- **Usage**: Reference for implementing and consuming the API
+
+#### DATABASE\_INTEGRATION.md
+
+- **Purpose**: Provides strategies for database integration
+
+- **Content**: Schema designs, connection methods, migration strategies, data handling practices
+
+- **Usage**: Guide for setting up and managing database connections
+
+#### IMPLEMENTATION\_SUMMARY.md
+
+- **Purpose**: Overview of the implementation process
+
+- **Content**: Key components, architectural decisions, best practices
+
+- **Usage**: High-level understanding of the project structure and approach
+
+### 4. Best Practices from the Repository
+
+#### Error Handling
+
+- Centralized exception filters for consistent error responses
+
+- Custom exception classes for different error types
+
+- Proper HTTP status code usage
+
+#### Validation
+
+- Use `class-validator` for request validation
+
+- Create DTOs for all input/output data
+
+- Implement validation pipes globally
+
+#### Security
+
+- JWT authentication with Passport.js
+
+- Helmet for security headers
+
+- CORS configuration
+
+- Rate limiting (if needed)
+
+#### Testing
+
+- Unit tests for services and utilities
+
+- E2E tests for API endpoints
+
+- Test coverage reporting
+
+#### Code Quality
+
+- TypeScript strict mode
+
+- ESLint and Prettier configuration
+
+- Consistent naming conventions
+
+- Comprehensive JSDoc comments
+
+### 5. Development Workflow
+
+1. **Setup Environment**
+
+   ```bash
+   cp env.example .env
+   # Configure environment variables
+   ```
+
+2. **Install Dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Database Setup**
+
+   - Configure database connection
+
+   - Run migrations (if using TypeORM migrations)
+
+4. **Development**
+
+   ```bash
+   npm run start:dev
+   ```
+
+5. **Testing**
+
+   ```bash
+   npm run test          # Unit tests
+   npm run test:e2e      # E2E tests
+   npm run test:cov      # Coverage report
+   ```
+
+6. **Documentation**
+
+   - Access Swagger UI at `http://localhost:3000/api/docs`
+
+   - Update API\_DOCUMENTATION.md as needed
+
+### 6. MCP-Specific Considerations
+
+While the repository demonstrates the backend API structure, for a complete MCP server implementation, you would also need:
+
+- **MCP Protocol Handler**: Implement the MCP protocol specification
+
+- **Resource Management**: Handle resources that AI models can access
+
+- **Tool Definitions**: Define tools that AI models can invoke
+
+- **Prompt Templates**: Create reusable prompt templates
+
+- **Context Management**: Maintain context across multiple interactions
+
+## Conclusion
+
+The [learnflo-mcp-be-api](https://github.com/tomibudis/learnflo-mcp-be-api) repository provides an excellent foundation for building MCP servers by demonstrating:
+
+### Key Takeaways
+
+1. **Structured Approach**: The modular architecture makes it easy to extend and maintain the codebase
+
+2. **Best Practices**: Following NestJS and TypeScript best practices ensures code quality and developer experience
+
+3. **Comprehensive Documentation**: Well-documented code and guides make it easier for teams to collaborate
+
+4. **Scalability**: The architecture supports growth from simple APIs to complex integrations
+
+5. **Developer Experience**: TypeScript, Swagger, and testing setup improve productivity
+
+### Next Steps
+
+To build your own MCP server based on this approach:
+
+1. **Study the Repository**: Review the code structure and documentation files
+
+2. **Understand MCP Protocol**: Familiarize yourself with the MCP specification
+
+3. **Start Small**: Begin with a simple module (like health checks or users)
+
+4. **Iterate**: Gradually add more features following the established patterns
+
+5. **Document**: Keep documentation updated as you develop
+
+6. **Test**: Write tests alongside development to ensure quality
+
+### Final Thoughts
+
+Creating an MCP server doesn't have to be overwhelming. By following the structured approach demonstrated in the LearnFlo repository, you can build a robust, maintainable server that standardizes AI-API interactions. The key is to start with a solid foundation, follow established patterns, and iterate based on your specific needs.
+
+The repository serves as both a learning resource and a practical template, making it easier to understand not just *what* to build, but *how* to build it correctly. Whether you're building a simple API wrapper or a complex multi-service integration, the principles demonstrated here will guide you toward a successful implementation.
+
+---
+
+**Resources:**
+
+- Repository: [https://github.com/tomibudis/learnflo-mcp-be-api](https://github.com/tomibudis/learnflo-mcp-be-api)
+
+- NestJS Documentation: [https://docs.nestjs.com](https://docs.nestjs.com)
+
+- TypeScript Handbook: [https://www.typescriptlang.org/docs](https://www.typescriptlang.org/docs)
+
