@@ -1,0 +1,1216 @@
+# Progressive Web App (PWA) Comprehensive Guide
+
+> A complete guide to implementing PWA in React applications: when to use, pros/cons, best practices, UX considerations, pull-to-refresh, and versioning strategies.
+
+## Table of Contents
+
+1. [What is PWA?](#what-is-pwa)
+2. [When to Use PWA](#when-to-use-pwa)
+3. [Pros and Cons](#pros-and-cons)
+4. [Best Way to Implement PWA on React App](#best-way-to-implement-pwa-on-react-app)
+5. [Things to Pay Attention To](#things-to-pay-attention-to)
+   - [UX Design for Mobile](#ux-design-for-mobile)
+   - [Pull to Refresh](#pull-to-refresh)
+   - [Versioning and Force Update](#versioning-and-force-update)
+6. [Conclusion](#conclusion)
+
+---
+
+## What is PWA?
+
+**Progressive Web App (PWA)** is a web application that uses modern web capabilities to deliver an app-like experience to users. PWAs combine the best of web and mobile apps:
+
+- **Web**: Accessible via URL, no app store required, easy to share
+- **Mobile App**: Installable, works offline, push notifications, native-like experience
+
+### Core PWA Features
+
+1. **Service Worker**: Background script for offline functionality and caching
+2. **Web App Manifest**: JSON file defining app metadata (name, icons, theme)
+3. **HTTPS**: Required for service workers (except localhost)
+4. **Responsive Design**: Works on all devices
+5. **App-like Experience**: Full-screen, standalone mode
+
+---
+
+## When to Use PWA
+
+### ✅ Ideal Use Cases
+
+#### 1. **Cross-Platform Mobile App Alternative**
+- Need to support iOS, Android, and Web with single codebase
+- Want to avoid app store approval processes
+- Need faster deployment cycles
+
+**Example:** Internal tools, dashboards, admin panels
+
+#### 2. **Frequent Updates Required**
+- Content changes frequently (news, social media, dashboards)
+- Need to push updates without app store approval
+- Real-time data synchronization
+
+**Example:** Monitoring dashboards, reporting tools, command centers
+
+#### 3. **Offline Functionality Needed**
+- Users need access in areas with poor connectivity
+- Critical data must be available offline
+- Background sync capabilities required
+
+**Example:** Field service apps, inspection tools, data collection apps
+
+#### 4. **Cost-Effective Solution**
+- Limited budget for native app development
+- Want to leverage existing web development skills
+- Need to reach users across platforms quickly
+
+**Example:** Startups, MVPs, internal tools
+
+#### 5. **Web-First Applications**
+- Application is primarily web-based
+- Users already access via browser
+- Want to enhance with app-like features
+
+**Example:** Your Korlantas app (already web-based, can benefit from PWA)
+
+### ⚠️ Consider Alternatives When
+
+#### 1. **Heavy Native Features Required**
+- Complex camera/image processing
+- Advanced Bluetooth/NFC integration
+- Deep OS integration (contacts, calendar)
+- Heavy use of device sensors
+
+**Alternative:** Native app or React Native
+
+#### 2. **App Store Presence Critical**
+- Brand credibility requires app store presence
+- Need app store marketing and discovery
+- Users expect native app experience
+
+**Alternative:** Native app or hybrid (PWA + native wrapper)
+
+#### 3. **iOS Limitations**
+- Need advanced iOS features (background location, push notifications have limitations)
+- iOS Safari PWA support is limited compared to Android
+- Users primarily on iOS with high expectations
+
+**Alternative:** Native iOS app or hybrid approach
+
+#### 4. **Performance-Critical Applications**
+- Real-time gaming, video editing
+- Heavy computational tasks
+- Maximum performance requirements
+
+**Alternative:** Native app
+
+### 🎯 Decision Matrix
+
+| Scenario | Recommendation |
+|----------|---------------|
+| Internal tools, dashboards | ✅ **Strongly Recommended** |
+| Content-heavy apps (news, blogs) | ✅ **Recommended** |
+| E-commerce, booking apps | ✅ **Recommended** |
+| Social media, messaging | ⚠️ **Consider** (may need native) |
+| Gaming, video editing | ❌ **Not suitable** |
+| iOS-only, advanced features | ❌ **Not suitable** |
+| Cross-platform, web-first | ✅ **Strongly Recommended** |
+
+---
+
+## Pros and Cons
+
+### ✅ Pros
+
+#### 1. **Cross-Platform Compatibility**
+- **Single codebase** for iOS, Android, and Web
+- **Faster development** and maintenance
+- **Consistent experience** across platforms
+
+#### 2. **No App Store Required**
+- **Faster deployment** - update instantly
+- **No approval process** - deploy when ready
+- **Lower barrier to entry** - users install from browser
+- **No app store fees** (30% cut on in-app purchases)
+
+#### 3. **Offline Functionality**
+- **Works without internet** (with service worker)
+- **Background sync** when connection restored
+- **Cached content** for instant loading
+- **Better user experience** in poor connectivity
+
+#### 4. **Smaller Size**
+- **No app store download** - installs from browser
+- **Efficient caching** - only downloads what's needed
+- **Faster initial load** compared to native apps
+
+#### 5. **Easy Updates**
+- **Instant updates** - no app store approval
+- **Automatic updates** - users get latest version
+- **A/B testing** capabilities
+- **Rollback** is simple
+
+#### 6. **SEO Benefits**
+- **Discoverable** via search engines
+- **Shareable links** - easy to share specific pages
+- **Indexable content** - better SEO than native apps
+
+#### 7. **Cost Effective**
+- **Single development team** (web developers)
+- **Lower maintenance** costs
+- **No app store fees**
+- **Faster time to market**
+
+#### 8. **Installation Flexibility**
+- **Users choose** to install or use in browser
+- **No forced installation** - works in browser too
+- **Easy uninstall** - remove from home screen
+
+### ❌ Cons
+
+#### 1. **iOS Limitations**
+- **Limited PWA support** on iOS Safari
+- **No background sync** on iOS (until iOS 16.4+)
+- **Push notifications** limited (iOS 16.4+)
+- **No access to some native APIs**
+
+#### 2. **Performance Limitations**
+- **JavaScript performance** slower than native
+- **Battery consumption** can be higher
+- **Memory management** less efficient
+- **Not suitable for heavy computation**
+
+#### 3. **Limited Native Features**
+- **No access to all device APIs** (contacts, calendar, etc.)
+- **Camera/Media** access is limited
+- **Bluetooth/NFC** support is limited
+- **File system** access is restricted
+
+#### 4. **Discoverability Challenges**
+- **Not in app stores** - harder to discover
+- **Users may not know** about "Add to Home Screen"
+- **Less brand credibility** than native apps
+- **Marketing** requires education
+
+#### 5. **Browser Dependency**
+- **Different behavior** across browsers
+- **Feature support** varies by browser
+- **User must have modern browser**
+- **Some browsers** don't support all PWA features
+
+#### 6. **Offline Complexity**
+- **Service worker** complexity
+- **Cache management** can be tricky
+- **Data synchronization** challenges
+- **Storage limitations** (browser quotas)
+
+#### 7. **Security Considerations**
+- **HTTPS required** (good practice, but adds complexity)
+- **Service worker** security model
+- **CORS** restrictions
+- **Content Security Policy** considerations
+
+#### 8. **Testing Complexity**
+- **Multiple browsers** to test
+- **Different devices** and screen sizes
+- **Service worker** debugging can be challenging
+- **Offline scenarios** are hard to test
+
+---
+
+## Best Way to Implement PWA on React App
+
+### Step 1: Choose PWA Plugin for Vite
+
+For Vite-based React apps, use **`vite-plugin-pwa`**:
+
+```bash
+npm install -D vite-plugin-pwa
+```
+
+### Step 2: Configure Vite
+
+Update `vite.config.ts`:
+
+```typescript
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
+
+export default defineConfig({
+  plugins: [
+    react(),
+    VitePWA({
+      // Register service worker
+      registerType: 'autoUpdate',
+      
+      // Manifest configuration
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      manifest: {
+        name: 'Korlantas App',
+        short_name: 'Korlantas',
+        description: 'Korlantas Patrol Management System',
+        theme_color: '#ffffff',
+        background_color: '#ffffff',
+        display: 'standalone',
+        orientation: 'portrait',
+        scope: '/',
+        start_url: '/',
+        icons: [
+          {
+            src: 'pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+          },
+          {
+            src: 'pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable',
+          },
+        ],
+      },
+      
+      // Service worker configuration
+      workbox: {
+        // Cache strategy
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        
+        // Runtime caching
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/api\.yourdomain\.com\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'api-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24, // 24 hours
+              },
+              networkTimeoutSeconds: 10,
+            },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+              },
+            },
+          },
+        ],
+        
+        // Skip waiting (for immediate updates)
+        skipWaiting: true,
+        clientsClaim: true,
+      },
+      
+      // Development options
+      devOptions: {
+        enabled: true, // Enable in development
+        type: 'module', // Use module type for dev
+      },
+    }),
+  ],
+});
+```
+
+### Step 3: Update index.html
+
+Add PWA meta tags to `index.html`:
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="description" content="Korlantas Patrol Management System" />
+    
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    
+    <title>Korlantas App</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+```
+
+### Step 4: Create PWA Icons
+
+Generate icons in `public/` directory:
+- `pwa-192x192.png` (192x192px)
+- `pwa-512x512.png` (512x512px)
+- `apple-touch-icon.png` (180x180px for iOS)
+- `favicon.ico` (32x32px)
+
+**Tool:** Use [PWA Asset Generator](https://github.com/onderceylan/pwa-asset-generator) or [RealFaviconGenerator](https://realfavicongenerator.net/)
+
+### Step 5: Handle Service Worker Updates
+
+Create a component to handle updates:
+
+```typescript
+// src/components/pwa/UpdatePrompt.tsx
+import { useRegisterSW } from 'virtual:pwa-register/react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
+export function UpdatePrompt() {
+  const {
+    offlineReady: [offlineReady, setOfflineReady],
+    needRefresh: [needRefresh, setNeedRefresh],
+    updateServiceWorker,
+  } = useRegisterSW({
+    onRegistered(r) {
+      console.log('SW Registered: ', r);
+    },
+    onRegisterError(error) {
+      console.log('SW registration error', error);
+    },
+  });
+
+  const close = () => {
+    setOfflineReady(false);
+    setNeedRefresh(false);
+  };
+
+  return (
+    <>
+      {offlineReady && (
+        <Dialog open={offlineReady} onOpenChange={close}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>App Ready</DialogTitle>
+              <DialogDescription>
+                App ready to work offline
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button onClick={close}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {needRefresh && (
+        <Dialog open={needRefresh} onOpenChange={close}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>New Update Available</DialogTitle>
+              <DialogDescription>
+                A new version of the app is available. Click reload to update.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={close}>
+                Later
+              </Button>
+              <Button onClick={() => updateServiceWorker(true)}>
+                Reload
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
+  );
+}
+```
+
+### Step 6: Add to Root Component
+
+```typescript
+// src/routes/__root.tsx
+import { createRootRoute, Outlet } from '@tanstack/react-router';
+import { Toaster } from 'sonner';
+import { RootProvider } from '@/context/root';
+import { UpdatePrompt } from '@/components/pwa/UpdatePrompt';
+
+export const Route = createRootRoute({
+  component: () => (
+    <RootProvider>
+      <main className="relative">
+        <Outlet />
+      </main>
+      <Toaster position="bottom-right" />
+      <UpdatePrompt />
+    </RootProvider>
+  ),
+});
+```
+
+### Step 7: Install PWA Types
+
+```bash
+npm install -D @types/dom
+```
+
+### Step 8: Build and Test
+
+```bash
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+Test PWA features:
+- Open DevTools → Application → Service Workers
+- Check "Offline" checkbox to test offline mode
+- Use Lighthouse to audit PWA score
+
+---
+
+## Things to Pay Attention To
+
+### UX Design for Mobile
+
+#### 1. **Mobile-First Design**
+
+**Touch Targets:**
+- Minimum **44x44px** touch targets (Apple HIG)
+- Minimum **48x48px** (Material Design)
+- Adequate spacing between interactive elements
+
+```typescript
+// Good: Large touch targets
+<Button className="min-h-[44px] min-w-[44px]">Action</Button>
+
+// Bad: Small touch targets
+<Button className="h-6 w-6">Action</Button>
+```
+
+**Responsive Typography:**
+- Use relative units (rem, em) for scalability
+- Minimum 16px font size to prevent zoom on iOS
+- Line height: 1.5-1.6 for readability
+
+```css
+/* Good */
+.text-base {
+  font-size: 1rem; /* 16px */
+  line-height: 1.5;
+}
+
+/* Bad */
+.text-tiny {
+  font-size: 12px; /* Too small, causes zoom on iOS */
+}
+```
+
+#### 2. **Safe Area Insets**
+
+Handle notches and system UI:
+
+```css
+/* Use safe area insets for iOS */
+.container {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+```
+
+```typescript
+// React component with safe areas
+<div className="pb-safe">
+  {/* Content */}
+</div>
+```
+
+#### 3. **Performance Optimization**
+
+**Code Splitting:**
+```typescript
+// Lazy load heavy components
+const HeavyComponent = lazy(() => import('./HeavyComponent'));
+
+function App() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <HeavyComponent />
+    </Suspense>
+  );
+}
+```
+
+**Image Optimization:**
+- Use WebP format
+- Implement lazy loading
+- Provide responsive images
+
+```typescript
+<img
+  src="image.webp"
+  loading="lazy"
+  alt="Description"
+  className="w-full h-auto"
+/>
+```
+
+**Virtual Scrolling:**
+For long lists, use virtual scrolling:
+
+```typescript
+import { useVirtualizer } from '@tanstack/react-virtual';
+
+function VirtualList({ items }) {
+  const parentRef = useRef();
+  
+  const virtualizer = useVirtualizer({
+    count: items.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 50,
+  });
+
+  return (
+    <div ref={parentRef} className="h-[400px] overflow-auto">
+      <div style={{ height: `${virtualizer.getTotalSize()}px` }}>
+        {virtualizer.getVirtualItems().map((virtualItem) => (
+          <div key={virtualItem.key} style={{ height: `${virtualItem.size}px` }}>
+            {items[virtualItem.index]}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
+#### 4. **Loading States**
+
+Always show loading states:
+
+```typescript
+function DataList() {
+  const { data, isLoading, isError } = useGetData();
+
+  if (isLoading) {
+    return <SkeletonLoader />;
+  }
+
+  if (isError) {
+    return <ErrorState />;
+  }
+
+  return <DataItems items={data} />;
+}
+```
+
+#### 5. **Offline Indicators**
+
+Show connection status:
+
+```typescript
+// src/hooks/use-online-status.ts
+import { useEffect, useState } from 'react';
+
+export function useOnlineStatus() {
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  return isOnline;
+}
+
+// Usage
+function App() {
+  const isOnline = useOnlineStatus();
+
+  return (
+    <>
+      {!isOnline && (
+        <div className="fixed top-0 left-0 right-0 bg-yellow-500 text-white p-2 text-center">
+          You're offline. Some features may be limited.
+        </div>
+      )}
+      {/* App content */}
+    </>
+  );
+}
+```
+
+### Pull to Refresh
+
+#### Implementation with React
+
+**Option 1: Using `react-pull-to-refresh` Library**
+
+```bash
+npm install react-pull-to-refresh
+```
+
+```typescript
+// src/components/pull-to-refresh/PullToRefresh.tsx
+import PullToRefresh from 'react-pull-to-refresh';
+import { RefreshCw } from 'lucide-react';
+
+interface PullToRefreshProps {
+  onRefresh: () => Promise<void>;
+  children: React.ReactNode;
+}
+
+export function PullToRefreshWrapper({ onRefresh, children }: PullToRefreshProps) {
+  return (
+    <PullToRefresh
+      onRefresh={onRefresh}
+      pullingContent={
+        <div className="flex items-center justify-center p-4">
+          <RefreshCw className="animate-spin h-5 w-5" />
+          <span className="ml-2">Pull to refresh</span>
+        </div>
+      }
+      refreshingContent={
+        <div className="flex items-center justify-center p-4">
+          <RefreshCw className="animate-spin h-5 w-5" />
+          <span className="ml-2">Refreshing...</span>
+        </div>
+      }
+    >
+      {children}
+    </PullToRefresh>
+  );
+}
+```
+
+**Option 2: Custom Implementation with Touch Events**
+
+```typescript
+// src/hooks/use-pull-to-refresh.ts
+import { useEffect, useRef, useState } from 'react';
+
+interface UsePullToRefreshOptions {
+  onRefresh: () => Promise<void>;
+  threshold?: number;
+  disabled?: boolean;
+}
+
+export function usePullToRefresh({
+  onRefresh,
+  threshold = 80,
+  disabled = false,
+}: UsePullToRefreshOptions) {
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [pullDistance, setPullDistance] = useState(0);
+  const startY = useRef<number | null>(null);
+  const elementRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (disabled) return;
+
+    const element = elementRef.current;
+    if (!element) return;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (window.scrollY === 0) {
+        startY.current = e.touches[0].clientY;
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (startY.current === null || window.scrollY > 0) return;
+
+      const currentY = e.touches[0].clientY;
+      const distance = currentY - startY.current;
+
+      if (distance > 0) {
+        e.preventDefault();
+        setPullDistance(Math.min(distance, threshold * 1.5));
+      }
+    };
+
+    const handleTouchEnd = async () => {
+      if (startY.current === null) return;
+
+      if (pullDistance >= threshold && !isRefreshing) {
+        setIsRefreshing(true);
+        try {
+          await onRefresh();
+        } finally {
+          setIsRefreshing(false);
+          setPullDistance(0);
+        }
+      } else {
+        setPullDistance(0);
+      }
+
+      startY.current = null;
+    };
+
+    element.addEventListener('touchstart', handleTouchStart);
+    element.addEventListener('touchmove', handleTouchMove);
+    element.addEventListener('touchend', handleTouchEnd);
+
+    return () => {
+      element.removeEventListener('touchstart', handleTouchStart);
+      element.removeEventListener('touchmove', handleTouchMove);
+      element.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [onRefresh, threshold, disabled, pullDistance, isRefreshing]);
+
+  return {
+    elementRef,
+    isRefreshing,
+    pullDistance,
+    pullProgress: Math.min(pullDistance / threshold, 1),
+  };
+}
+
+// Usage Component
+function PullToRefreshContainer({ onRefresh, children }) {
+  const { elementRef, isRefreshing, pullProgress } = usePullToRefresh({
+    onRefresh,
+  });
+
+  return (
+    <div ref={elementRef} className="relative">
+      {/* Pull indicator */}
+      {pullProgress > 0 && (
+        <div
+          className="fixed top-0 left-0 right-0 flex items-center justify-center bg-primary text-primary-foreground transition-transform"
+          style={{
+            height: `${Math.min(pullProgress * 80, 80)}px`,
+            transform: `translateY(${pullProgress > 1 ? 0 : -100}%)`,
+          }}
+        >
+          {isRefreshing ? (
+            <RefreshCw className="animate-spin h-5 w-5" />
+          ) : (
+            <span>Pull to refresh</span>
+          )}
+        </div>
+      )}
+      {children}
+    </div>
+  );
+}
+```
+
+**Integration with TanStack Query:**
+
+```typescript
+// src/features/reports/ReportsList.tsx
+import { useGetReports } from '@/hooks/queries/use-get-reports.query';
+import { PullToRefreshWrapper } from '@/components/pull-to-refresh/PullToRefresh';
+import { useQueryClient } from '@tanstack/react-query';
+
+export function ReportsList() {
+  const queryClient = useQueryClient();
+  const { data, isLoading } = useGetReports({ page: 1, limit: 10 });
+
+  const handleRefresh = async () => {
+    // Invalidate and refetch
+    await queryClient.invalidateQueries({ queryKey: ['reports'] });
+  };
+
+  return (
+    <PullToRefreshWrapper onRefresh={handleRefresh}>
+      <div className="p-4">
+        {isLoading ? (
+          <div>Loading...</div>
+        ) : (
+          <div>
+            {data?.pages[0]?.data.data.map((report) => (
+              <div key={report.id}>{report.reportNumber}</div>
+            ))}
+          </div>
+        )}
+      </div>
+    </PullToRefreshWrapper>
+  );
+}
+```
+
+### Versioning and Force Update
+
+#### Strategy 1: Version-Based Update Check
+
+**1. Create Version Service:**
+
+```typescript
+// src/services/version.service.ts
+const APP_VERSION = import.meta.env.VITE_APP_VERSION || '1.0.0';
+
+export async function checkForUpdates(): Promise<boolean> {
+  try {
+    const response = await fetch('/version.json', {
+      cache: 'no-store',
+    });
+    const { version } = await response.json();
+    return version !== APP_VERSION;
+  } catch {
+    return false;
+  }
+}
+
+export function getCurrentVersion(): string {
+  return APP_VERSION;
+}
+```
+
+**2. Create Version Endpoint:**
+
+```json
+// public/version.json
+{
+  "version": "1.0.1",
+  "buildDate": "2024-01-15T10:00:00Z",
+  "forceUpdate": false
+}
+```
+
+**3. Version Check Hook:**
+
+```typescript
+// src/hooks/use-version-check.ts
+import { useEffect, useState } from 'react';
+import { checkForUpdates, getCurrentVersion } from '@/services/version.service';
+import { useRegisterSW } from 'virtual:pwa-register/react';
+
+export function useVersionCheck(interval: number = 5 * 60 * 1000) {
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [forceUpdate, setForceUpdate] = useState(false);
+  const { updateServiceWorker } = useRegisterSW();
+
+  useEffect(() => {
+    const checkVersion = async () => {
+      const hasUpdate = await checkForUpdates();
+      setUpdateAvailable(hasUpdate);
+
+      if (hasUpdate) {
+        // Check if force update is required
+        const response = await fetch('/version.json', { cache: 'no-store' });
+        const { forceUpdate: force } = await response.json();
+        setForceUpdate(force);
+      }
+    };
+
+    // Check immediately
+    checkVersion();
+
+    // Check periodically
+    const intervalId = setInterval(checkVersion, interval);
+
+    return () => clearInterval(intervalId);
+  }, [interval]);
+
+  const handleUpdate = () => {
+    updateServiceWorker(true);
+  };
+
+  return {
+    updateAvailable,
+    forceUpdate,
+    currentVersion: getCurrentVersion(),
+    handleUpdate,
+  };
+}
+```
+
+**4. Update Prompt Component:**
+
+```typescript
+// src/components/pwa/VersionUpdatePrompt.tsx
+import { useEffect } from 'react';
+import { useVersionCheck } from '@/hooks/use-version-check';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { AlertTriangle } from 'lucide-react';
+
+export function VersionUpdatePrompt() {
+  const { updateAvailable, forceUpdate, handleUpdate } = useVersionCheck();
+
+  // Force update: block UI until update
+  useEffect(() => {
+    if (forceUpdate) {
+      // Prevent user interaction
+      document.body.style.pointerEvents = 'none';
+    }
+  }, [forceUpdate]);
+
+  if (!updateAvailable) return null;
+
+  return (
+    <Dialog open={updateAvailable} onOpenChange={() => !forceUpdate}>
+      <DialogContent className={forceUpdate ? 'pointer-events-auto' : ''}>
+        <DialogHeader>
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-yellow-500" />
+            <DialogTitle>
+              {forceUpdate ? 'Update Required' : 'Update Available'}
+            </DialogTitle>
+          </div>
+          <DialogDescription>
+            {forceUpdate
+              ? 'A critical update is available. Please update to continue using the app.'
+              : 'A new version of the app is available. Would you like to update now?'}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          {!forceUpdate && (
+            <Button variant="outline" onClick={() => {}}>
+              Later
+            </Button>
+          )}
+          <Button onClick={handleUpdate}>
+            {forceUpdate ? 'Update Now' : 'Update'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+```
+
+#### Strategy 2: Service Worker Update Detection
+
+**Enhanced Service Worker Registration:**
+
+```typescript
+// src/components/pwa/ServiceWorkerUpdate.tsx
+import { useRegisterSW } from 'virtual:pwa-register/react';
+import { useEffect, useState } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+
+export function ServiceWorkerUpdate() {
+  const [showUpdatePrompt, setShowUpdatePrompt] = useState(false);
+  const [updateCount, setUpdateCount] = useState(0);
+
+  const {
+    needRefresh: [needRefresh, setNeedRefresh],
+    updateServiceWorker,
+  } = useRegisterSW({
+    onRegistered(registration) {
+      console.log('Service Worker registered:', registration);
+
+      // Check for updates every hour
+      setInterval(() => {
+        registration?.update();
+      }, 60 * 60 * 1000);
+    },
+    onRegisterError(error) {
+      console.error('SW registration error', error);
+    },
+    onNeedRefresh() {
+      setUpdateCount((prev) => prev + 1);
+      setShowUpdatePrompt(true);
+    },
+  });
+
+  const handleUpdate = () => {
+    updateServiceWorker(true);
+    setShowUpdatePrompt(false);
+  };
+
+  const handleDismiss = () => {
+    setShowUpdatePrompt(false);
+    setNeedRefresh(false);
+  };
+
+  return (
+    <Dialog open={showUpdatePrompt && needRefresh} onOpenChange={setShowUpdatePrompt}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Update Available</DialogTitle>
+          <DialogDescription>
+            {updateCount > 1
+              ? `A new version is available (${updateCount} updates pending). Please update to get the latest features and fixes.`
+              : 'A new version of the app is available. Would you like to update now?'}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" onClick={handleDismiss}>
+            Later
+          </Button>
+          <Button onClick={handleUpdate}>Update Now</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+```
+
+#### Strategy 3: Build-Time Version Injection
+
+**Update vite.config.ts:**
+
+```typescript
+import { defineConfig } from 'vite';
+import { VitePWA } from 'vite-plugin-pwa';
+
+export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
+    __BUILD_DATE__: JSON.stringify(new Date().toISOString()),
+  },
+  plugins: [
+    VitePWA({
+      // ... other config
+      workbox: {
+        // ... other config
+        // Inject version into service worker
+        additionalManifestEntries: [
+          {
+            url: '/version.json',
+            revision: process.env.npm_package_version || null,
+          },
+        ],
+      },
+    }),
+  ],
+});
+```
+
+**Generate version.json during build:**
+
+```typescript
+// scripts/generate-version.js
+import { writeFileSync } from 'fs';
+import { join } from 'path';
+
+const version = process.env.npm_package_version || '1.0.0';
+const buildDate = new Date().toISOString();
+
+const versionData = {
+  version,
+  buildDate,
+  forceUpdate: false, // Set to true for critical updates
+};
+
+writeFileSync(
+  join(process.cwd(), 'public', 'version.json'),
+  JSON.stringify(versionData, null, 2)
+);
+
+console.log(`Version file generated: ${version} (${buildDate})`);
+```
+
+**Add to package.json:**
+
+```json
+{
+  "scripts": {
+    "prebuild": "node scripts/generate-version.js",
+    "build": "tsc --noEmit && vite build"
+  }
+}
+```
+
+#### Best Practices for Force Updates
+
+1. **Use Force Update Sparingly**
+   - Only for critical security fixes
+   - Breaking API changes
+   - Critical bug fixes
+
+2. **Gradual Rollout**
+   - Start with 10% of users
+   - Monitor for issues
+   - Gradually increase to 100%
+
+3. **User Communication**
+   - Clear update messages
+   - Explain what changed
+   - Show changelog
+
+4. **Fallback Strategy**
+   - Keep old version available for rollback
+   - Monitor error rates
+   - Have rollback plan
+
+---
+
+## Conclusion
+
+### Summary
+
+**PWA is an excellent choice when:**
+- ✅ You need cross-platform support with single codebase
+- ✅ You want faster deployment without app stores
+- ✅ Offline functionality is important
+- ✅ You're building web-first applications
+- ✅ Cost and time-to-market are priorities
+
+**Consider alternatives when:**
+- ❌ You need heavy native features
+- ❌ App store presence is critical
+- ❌ Performance is absolutely critical
+- ❌ iOS-only with advanced requirements
+
+### Key Takeaways
+
+1. **Mobile-First Design**: Prioritize touch targets, responsive design, and performance
+2. **Pull to Refresh**: Essential for mobile UX, integrate with your data fetching
+3. **Version Management**: Implement robust update checking and force update for critical changes
+4. **Offline Support**: Use service workers effectively for better user experience
+5. **Progressive Enhancement**: PWA should enhance, not replace, web experience
+
+### Implementation Checklist
+
+- [ ] Install and configure `vite-plugin-pwa`
+- [ ] Create PWA manifest with proper icons
+- [ ] Implement service worker with caching strategy
+- [ ] Add update prompt component
+- [ ] Implement pull-to-refresh functionality
+- [ ] Set up version checking system
+- [ ] Test offline functionality
+- [ ] Optimize for mobile (touch targets, safe areas)
+- [ ] Test on multiple devices and browsers
+- [ ] Run Lighthouse PWA audit
+
+### Next Steps
+
+1. **Start Small**: Implement basic PWA features first
+2. **Test Thoroughly**: Test on real devices, different browsers
+3. **Monitor**: Track installation rates, update adoption
+4. **Iterate**: Improve based on user feedback
+5. **Document**: Keep your team informed about PWA capabilities
+
+### Resources
+
+- [MDN: Progressive Web Apps](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps)
+- [Web.dev: PWA](https://web.dev/progressive-web-apps/)
+- [Vite PWA Plugin](https://vite-pwa-org.netlify.app/)
+- [Workbox Documentation](https://developers.google.com/web/tools/workbox)
+- [PWA Checklist](https://web.dev/pwa-checklist/)
+
+---
+
+**Happy Building! 🚀**
+
+*This documentation provides a comprehensive guide to implementing PWA in React applications. Adapt these patterns to your specific needs and requirements.*
+
