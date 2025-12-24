@@ -1,4 +1,852 @@
 ---
 title: Dokploy configuration
 ---
+## What is Dokploy?
+
+Dokploy is an **open-source Platform as a Service (PaaS)** designed to simplify the deployment and management of applications and databases. It serves as a self-hostable alternative to commercial platforms like Heroku, Vercel, and Netlify.
+
+### Key Characteristics
+
+- **Self-Hosted**: Run on your own infrastructure (VPS, dedicated server, or cloud instance)
+
+- **Docker-Based**: Leverages Docker containers for application deployment
+
+- **Traefik Integration**: Uses Traefik as a reverse proxy and load balancer
+
+- **Open Source**: Free and open-source under MIT license
+
+- **Web-Based UI**: Intuitive dashboard for managing deployments
+
+### Core Features
+
+- Application deployment from Git repositories
+
+- Database management (PostgreSQL, MySQL, MongoDB, Redis, etc.)
+
+- SSL certificate management (Let's Encrypt)
+
+- Environment variable management
+
+- Log viewing and monitoring
+
+- Automated backups
+
+- Multi-project support
+
+- Team collaboration features
+
+## Benefits
+
+### 1. **Cost-Effective**
+
+- **No subscription fees**: Completely free and open-source
+
+- **Pay only for infrastructure**: You only pay for your server/VPS costs
+
+- **No vendor lock-in**: Own your deployment infrastructure
+
+- **Scalable pricing**: Scale based on your actual needs
+
+### 2. **Full Control**
+
+- **Complete customization**: Modify and extend as needed
+
+- **Data sovereignty**: Your data stays on your servers
+
+- **No usage limits**: Deploy as many applications as your server can handle
+
+- **Custom domains**: Full control over domain and DNS configuration
+
+### 3. **Simplicity**
+
+- **Easy setup**: One-command installation
+
+- **Intuitive UI**: Web-based dashboard for all operations
+
+- **Git integration**: Deploy directly from GitHub, GitLab, or Bitbucket
+
+- **One-click deployments**: Streamlined deployment process
+
+### 4. **Flexibility**
+
+- **Multi-language support**: Deploy applications in any language/framework
+
+- **Database variety**: Support for multiple database types
+
+- **Custom configurations**: Full control over Docker and environment settings
+
+- **Multiple environments**: Dev, staging, and production on the same server
+
+### 5. **Security**
+
+- **Self-hosted security**: You control security measures
+
+- **HTTPS by default**: Automatic SSL certificate management
+
+- **Environment isolation**: Applications run in isolated containers
+
+- **Access control**: Team and permission management
+
+## Comparison with Other Platforms
+
+### Dokploy vs Heroku
+
+| Feature            | Dokploy                         | Heroku                       |
+| ------------------ | ------------------------------- | ---------------------------- |
+| **Cost**           | Free (self-hosted)              | Paid plans ($7-$500+/month)  |
+| **Hosting**        | Your own server                 | Managed cloud                |
+| **Control**        | Full control                    | Limited customization        |
+| **Scaling**        | Manual (your resources)         | Automatic (paid)             |
+| **Vendor Lock-in** | None                            | High                         |
+| **Best For**       | Cost-conscious, control-focused | Quick setup, managed service |
+
+**When to choose Dokploy**: You want cost savings, full control, and don't mind managing infrastructure.
+
+**When to choose Heroku**: You need managed services, automatic scaling, and prefer paying for convenience.
+
+### Dokploy vs Vercel
+
+| Feature             | Dokploy                         | Vercel                             |
+| ------------------- | ------------------------------- | ---------------------------------- |
+| **Focus**           | Full-stack (frontend + backend) | Frontend-first                     |
+| **Cost**            | Free (self-hosted)              | Free tier + paid plans             |
+| **Backend Support** | Full backend support            | Limited (serverless functions)     |
+| **Database**        | Full database support           | Limited options                    |
+| **Deployment**      | Git + Docker                    | Git-based (optimized for frontend) |
+| **Best For**        | Full-stack applications         | Frontend/static sites              |
+
+**When to choose Dokploy**: You need full backend support, databases, and more control.
+
+**When to choose Vercel**: You're building frontend applications or static sites with minimal backend needs.
+
+### Dokploy vs Netlify
+
+| Feature      | Dokploy                     | Netlify                   |
+| ------------ | --------------------------- | ------------------------- |
+| **Focus**    | Full-stack applications     | Frontend/JAMstack         |
+| **Cost**     | Free (self-hosted)          | Free tier + paid plans    |
+| **Backend**  | Full backend support        | Serverless functions only |
+| **Database** | Multiple database options   | Limited (add-ons)         |
+| **Control**  | Full infrastructure control | Managed service           |
+| **Best For** | Full-stack apps, databases  | Static sites, JAMstack    |
+
+**When to choose Dokploy**: You need comprehensive backend and database support.
+
+**When to choose Netlify**: You're building static sites or JAMstack applications.
+
+### Dokploy vs DigitalOcean App Platform
+
+| Feature            | Dokploy                    | DigitalOcean App Platform         |
+| ------------------ | -------------------------- | --------------------------------- |
+| **Cost**           | Free (self-hosted)         | $5-$12+/month per app             |
+| **Setup**          | One command                | Managed service                   |
+| **Control**        | Full control               | Limited customization             |
+| **Infrastructure** | Your own server            | DigitalOcean managed              |
+| **Best For**       | Cost savings, full control | Managed PaaS on DO infrastructure |
+
+### Summary Comparison
+
+**Choose Dokploy if:**
+
+- You want to minimize costs
+
+- You need full control over infrastructure
+
+- You're comfortable managing servers
+
+- You want to avoid vendor lock-in
+
+- You need comprehensive backend and database support
+
+**Choose alternatives if:**
+
+- You prefer fully managed services
+
+- You need automatic scaling without configuration
+
+- You want vendor support and SLAs
+
+- You're building simple frontend-only applications
+
+## Installation and Usage
+
+### Prerequisites
+
+- **Server**: VPS, dedicated server, or cloud instance (Ubuntu 20.04+ recommended)
+
+- **Resources**: Minimum 2GB RAM, 2 CPU cores, 20GB storage
+
+- **Access**: Root or sudo access to the server
+
+- **Network**: Open ports 80, 443, and 3000 (or custom port)
+
+### Installation
+
+#### Method 1: Quick Install (Recommended)
+
+```bash
+# Run the official installation script
+curl -sSL https://dokploy.com/install.sh | sh
+```
+
+This script will:
+
+- Install Docker and Docker Compose
+
+- Set up Dokploy with all dependencies
+
+- Configure Traefik as reverse proxy
+
+- Start Dokploy services
+
+#### Method 2: Manual Installation with Docker Compose
+
+```bash
+# Clone the repository
+git clone https://github.com/Dokploy/dokploy.git
+cd dokploy
+
+# Copy environment file
+cp .env.example .env
+
+# Edit .env file with your configuration
+nano .env
+
+# Start Dokploy
+docker-compose up -d
+```
+
+### Initial Setup
+
+1. **Access the Dashboard**
+
+   - Open your browser and navigate to `http://[your-server-ip]:3000`
+
+   - Or use your domain if configured: `http://your-domain.com:3000`
+
+2. **Create Admin Account**
+
+   - Fill in the registration form
+
+   - Set up your admin username, email, and password
+
+   - Complete the initial setup wizard
+
+3. **Configure Server**
+
+   - Add your server details
+
+   - Configure domain settings (optional)
+
+   - Set up SSL certificates (Let's Encrypt)
+
+### Basic Usage
+
+#### Deploying an Application
+
+1. **Create a New Project**
+
+   - Click "New Project" in the dashboard
+
+   - Enter project name and description
+
+   - Select project type (Application, Database, etc.)
+
+2. **Connect Git Repository**
+
+   - Go to your project settings
+
+   - Connect your Git repository (GitHub, GitLab, Bitbucket)
+
+   - Authorize Dokploy to access your repositories
+
+3. **Configure Deployment**
+
+   - Select the repository and branch
+
+   - Configure build settings (Dockerfile or build commands)
+
+   - Set environment variables
+
+   - Configure port mappings
+
+4. **Deploy**
+
+   - Click "Deploy" button
+
+   - Monitor the deployment logs
+
+   - Access your application via the provided URL
+
+#### Managing Databases
+
+1. **Create Database**
+
+   - Click "New Project" → Select database type
+
+   - Choose PostgreSQL, MySQL, MongoDB, Redis, etc.
+
+   - Configure database name and credentials
+
+2. **Connect to Database**
+
+   - Use the connection string provided
+
+   - Add to your application's environment variables
+
+   - Test the connection
+
+3. **Backup and Restore**
+
+   - Configure automatic backups
+
+   - Manual backup/restore via dashboard
+
+   - Download backup files
+
+#### Environment Variables
+
+1. **Add Environment Variables**
+
+   - Go to project settings
+
+   - Navigate to "Environment Variables"
+
+   - Add key-value pairs
+
+   - Variables are available to your application at runtime
+
+2. **Secrets Management**
+
+   - Mark sensitive variables as "Secret"
+
+   - Values are hidden in the UI
+
+   - Use for API keys, passwords, tokens
+
+#### SSL Certificates
+
+1. **Automatic SSL (Let's Encrypt)**
+
+   - Enable in project settings
+
+   - Enter your domain name
+
+   - Dokploy automatically provisions and renews certificates
+
+2. **Custom SSL**
+
+   - Upload your own certificates
+
+   - Configure certificate and key files
+
+   - Set expiration reminders
+
+### Advanced Usage
+
+#### Custom Dockerfile
+
+```dockerfile
+# Example Dockerfile for Node.js application
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
+```
+
+#### Docker Compose Configuration
+
+For more complex setups, use `docker-compose.yml`:
+
+```yaml
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+    depends_on:
+      - db
+  
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=mydb
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
+```
+
+#### CI/CD Integration
+
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy to Dokploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy to Dokploy
+        run: |
+          curl -X POST https://your-dokploy-instance.com/api/deploy \
+            -H "Authorization: Bearer ${{ secrets.DOKPLOY_TOKEN }}" \
+            -d '{"project": "your-project", "branch": "main"}'
+```
+
+## Best Practices
+
+### 1. Server Management
+
+**Resource Planning**
+
+- Monitor CPU, RAM, and disk usage regularly
+
+- Plan for growth: allocate 20-30% extra resources
+
+- Use monitoring tools to track resource consumption
+
+**Security**
+
+- Keep Dokploy and Docker updated regularly
+
+- Use strong passwords for admin accounts
+
+- Enable two-factor authentication (if available)
+
+- Regularly review and rotate API keys and tokens
+
+- Configure firewall rules (only open necessary ports)
+
+**Backups**
+
+- Enable automatic backups for all databases
+
+- Store backups in multiple locations (local + cloud)
+
+- Test backup restoration regularly
+
+- Keep backup retention policy (e.g., 30 days)
+
+### 2. Application Deployment
+
+**Environment Separation**
+
+- Use separate projects for dev, staging, and production
+
+- Never use production credentials in development
+
+- Use environment variables for all configuration
+
+- Keep sensitive data out of code repositories
+
+**Git Workflow**
+
+- Use feature branches for development
+
+- Deploy to staging before production
+
+- Tag releases for easy rollback
+
+- Use semantic versioning
+
+**Docker Optimization**
+
+- Use multi-stage builds to reduce image size
+
+- Leverage Docker layer caching
+
+- Use `.dockerignore` to exclude unnecessary files
+
+- Choose appropriate base images (Alpine Linux for smaller images)
+
+**Example optimized Dockerfile:**
+
+```dockerfile
+# Multi-stage build example
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+
+FROM node:18-alpine
+WORKDIR /app
+COPY --from=builder /app/node_modules ./node_modules
+COPY . .
+EXPOSE 3000
+CMD ["node", "index.js"]
+```
+
+### 3. Database Management
+
+**Connection Pooling**
+
+- Configure appropriate connection pool sizes
+
+- Monitor database connections
+
+- Use connection string environment variables
+
+**Performance**
+
+- Create indexes for frequently queried fields
+
+- Regular database maintenance (VACUUM, OPTIMIZE)
+
+- Monitor slow queries
+
+- Use read replicas for read-heavy applications
+
+**Backup Strategy**
+
+- Daily automated backups
+
+- Test restore procedures monthly
+
+- Keep backups for at least 30 days
+
+- Store backups off-server (S3, Google Cloud Storage)
+
+### 4. Monitoring and Logging
+
+**Application Monitoring**
+
+- Set up health check endpoints
+
+- Monitor application logs regularly
+
+- Use structured logging (JSON format)
+
+- Set up alerts for errors and critical issues
+
+**Resource Monitoring**
+
+- Monitor server resources (CPU, RAM, disk)
+
+- Set up alerts for high resource usage
+
+- Track application response times
+
+- Monitor database performance
+
+**Log Management**
+
+- Centralize logs for easier debugging
+
+- Use log rotation to prevent disk fill-up
+
+- Keep logs for debugging but not indefinitely
+
+- Use log aggregation tools if needed
+
+### 5. Security Best Practices
+
+**Network Security**
+
+- Use HTTPS for all applications
+
+- Configure proper CORS policies
+
+- Use firewall rules to restrict access
+
+- Implement rate limiting
+
+**Application Security**
+
+- Keep dependencies updated
+
+- Scan for vulnerabilities regularly
+
+- Use secrets management for sensitive data
+
+- Implement proper authentication and authorization
+
+- Regular security audits
+
+**Container Security**
+
+- Use minimal base images
+
+- Run containers as non-root user when possible
+
+- Scan Docker images for vulnerabilities
+
+- Keep Docker and containers updated
+
+### 6. Cost Optimization
+
+**Resource Efficiency**
+
+- Right-size your server (not too big, not too small)
+
+- Use resource limits for containers
+
+- Monitor and optimize resource usage
+
+- Scale down unused applications
+
+**Storage Management**
+
+- Clean up old Docker images regularly
+
+- Remove unused volumes
+
+- Compress and archive old logs
+
+- Use efficient database storage
+
+## When to Use Dokploy
+
+### Ideal Use Cases
+
+✅ **Perfect For:**
+
+- **Startups and small teams**: Cost-effective deployment solution
+
+- **Side projects**: Free hosting for personal projects
+
+- **Full-stack applications**: Need both frontend and backend support
+
+- **Multiple applications**: Deploy many apps on one server
+
+- **Custom requirements**: Need full control over infrastructure
+
+- **Learning and experimentation**: Great for learning DevOps
+
+- **Data-sensitive applications**: Need data sovereignty
+
+- **Long-term projects**: Avoid vendor lock-in
+
+✅ **Good For:**
+
+- **Small to medium businesses**: Cost-effective PaaS solution
+
+- **Development teams**: Self-hosted CI/CD and deployment
+
+- **Agencies**: Manage multiple client projects
+
+- **Educational institutions**: Free deployment platform for students
+
+### Not Ideal For
+
+❌ **Consider Alternatives If:**
+
+- **Enterprise scale**: Need enterprise support and SLAs
+
+- **Zero infrastructure management**: Prefer fully managed services
+
+- **Automatic scaling**: Need auto-scaling without configuration
+
+- **Global CDN requirements**: Need edge computing and CDN
+
+- **Limited technical expertise**: No one to manage the server
+
+- **Critical uptime requirements**: Need guaranteed 99.99% uptime
+
+- **Compliance requirements**: Need specific compliance certifications
+
+### Decision Matrix
+
+| Scenario                   | Use Dokploy? | Alternative     |
+| -------------------------- | ------------ | --------------- |
+| Personal blog/side project | ✅ Yes        | -               |
+| Startup MVP                | ✅ Yes        | -               |
+| Enterprise application     | ❌ No         | AWS, Azure, GCP |
+| Need auto-scaling          | ❌ No         | Heroku, AWS ECS |
+| Frontend-only site         | ⚠️ Maybe     | Vercel, Netlify |
+| Full-stack app             | ✅ Yes        | -               |
+| Learning DevOps            | ✅ Yes        | -               |
+| Cost-sensitive             | ✅ Yes        | -               |
+| Need vendor support        | ❌ No         | Managed PaaS    |
+
+## Constraints and Limitations
+
+### Technical Constraints
+
+**Resource Limitations**
+
+- Limited by your server's resources (CPU, RAM, disk)
+
+- No automatic scaling (manual scaling required)
+
+- Single server deployment (unless you set up clustering)
+
+- Network bandwidth depends on your server's connection
+
+**Management Overhead**
+
+- You're responsible for server maintenance
+
+- Need to handle updates and security patches
+
+- Must manage backups and disaster recovery
+
+- Requires basic DevOps knowledge
+
+**Feature Limitations**
+
+- No built-in CDN (can be added separately)
+
+- Limited to Docker-based deployments
+
+- No serverless functions (traditional containers only)
+
+- Monitoring tools are basic compared to enterprise solutions
+
+### Operational Constraints
+
+**Support**
+
+- Community support only (no official support team)
+
+- Documentation may be incomplete for advanced use cases
+
+- Bug fixes depend on community contributions
+
+- No SLA guarantees
+
+**Learning Curve**
+
+- Requires understanding of Docker
+
+- Basic server administration knowledge needed
+
+- Git and CI/CD concepts helpful
+
+- Troubleshooting requires technical skills
+
+**Time Investment**
+
+- Initial setup and configuration time
+
+- Ongoing maintenance and updates
+
+- Monitoring and optimization
+
+- Backup and disaster recovery planning
+
+### Workarounds and Solutions
+
+**Scaling Issues**
+
+- Use load balancers (Traefik supports this)
+
+- Deploy to multiple servers with Dokploy
+
+- Use cloud auto-scaling groups
+
+- Implement horizontal scaling manually
+
+**Monitoring Gaps**
+
+- Integrate external monitoring (Prometheus, Grafana)
+
+- Use application performance monitoring (APM) tools
+
+- Set up custom alerting systems
+
+- Implement health check endpoints
+
+**Backup Concerns**
+
+- Use automated backup scripts
+
+- Integrate with cloud storage (S3, Backblaze)
+
+- Implement backup verification procedures
+
+- Test disaster recovery regularly
+
+## Conclusion
+
+Dokploy is a powerful, cost-effective solution for developers and teams seeking a self-hosted alternative to commercial PaaS platforms. It offers:
+
+### Key Takeaways
+
+1. **Cost Savings**: Eliminate subscription fees by hosting on your own infrastructure
+
+2. **Full Control**: Complete customization and data sovereignty
+
+3. **Flexibility**: Support for any language, framework, or database
+
+4. **Simplicity**: Easy setup and intuitive web-based management
+
+5. **Open Source**: Free, transparent, and community-driven
+
+### When to Choose Dokploy
+
+Choose Dokploy when you:
+
+- Want to minimize deployment costs
+
+- Need full control over your infrastructure
+
+- Are comfortable managing servers
+
+- Want to avoid vendor lock-in
+
+- Need comprehensive backend and database support
+
+- Are building full-stack applications
+
+### When to Consider Alternatives
+
+Consider alternatives when you:
+
+- Need enterprise-grade support and SLAs
+
+- Prefer fully managed services with zero maintenance
+
+- Require automatic scaling without configuration
+
+- Need global CDN and edge computing
+
+- Have limited technical expertise for server management
+
+- Need specific compliance certifications
+
+### Final Recommendation
+
+Dokploy is an excellent choice for:
+
+- **Startups and small teams** looking to reduce infrastructure costs
+
+- **Developers** who want to learn and control their deployment pipeline
+
+- **Projects** that need full-stack support with databases
+
+- **Organizations** that prioritize data sovereignty and customization
+
+With proper setup, monitoring, and following best practices, Dokploy can serve as a reliable, cost-effective deployment platform that grows with your needs. The investment in learning and setup pays off through long-term cost savings and complete infrastructure control.
+
+---
+
+**Resources:**
+
+- Official Documentation: [https://docs.dokploy.com](https://docs.dokploy.com)
+
+- GitHub Repository: [https://github.com/Dokploy/dokploy](https://github.com/Dokploy/dokploy)
+
+- Community Support: GitHub Discussions and Issues
 
