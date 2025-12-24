@@ -1,0 +1,557 @@
+---
+title: Solve CORS Issue
+---
+## Overview
+
+This guide explains how to configure CORS (Cross-Origin Resource Sharing) using Docker Compose and Nginx as a reverse proxy.
+
+## Prerequisites
+
+- Docker and Docker Compose installed
+
+- Basic understanding of CORS concepts
+
+## Quick Start
+
+### 1. Create Environment File (Optional but Recommended)
+
+Create a `.env` file in the project root with your API configuration (see [Environment Variables Configuration](#environment-variables-configuration) section below).
+
+### 2. Start the Nginx Proxy
+
+```bash
+docker-compose up -d
+```
+
+### 3. Verify Nginx is Running
+
+```bash
+curl http://localhost:8080
+# Should return: "Nginx dev proxy is running"
+```
+
+### 4. Configure Your Frontend
+
+Update your API base URL to use the proxy:
+
+- API calls: `http://localhost:8080/v1/` → proxies to `https://app-asia.getdialog.dev/api/`
+
+- OAuth calls: `http://localhost:8080/oauth` → proxies to `https://getdialog-dev.eu.auth0.com/oauth`
+
+## Environment Variables Configuration
+
+### Setup with .env File
+
+To make the nginx configuration flexible across different environments, use environment variables.
+
+#### 1. Create `.env` file in project root:
+
+```bash
+# API Configuration
+API_BASE_URL=https://app-asia.getdialog.dev
+API_PATH=/api
+API_HOST=app-asia.getdialog.dev
+
+# OAuth Configuration
+OAUTH_BASE_URL=https://getdialog-dev.eu.auth0.com
+OAUTH_PATH=/oauth
+OAUTH_HOST=getdialog-dev.eu.auth0.com
+```
+
+#### 2. Create `nginx/nginx.conf.template` (template file with variables):
+
+```nginx
+events {}
+
+http {
+    map $http_origin $cors_allow_origin {
+        default $http_origin;
+        "" "";
+        "~^https?://localhost(:\d+)?/?$" $http_origin;
+        "~^https?://127\.0\.0\.1(:\d+)?/?$" $http_origin;
+        "~^https?://.*\.localhost(:\d+)?/?$" $http_origin;
+    }
+
+    map $http_access_control_request_headers $cors_allow_headers {
+        default $http_access_control_request_headers;
+        "" "Authorization, Content-Type, Origin, Accept, X-Requested-With, X-Lang, X-Project";
+    }
+
+    server {
+        listen 80;
+        server_name localhost;
+
+        location /v1/ {
+            if ($request_method = OPTIONS) {
+                add_header 'Access-Control-Allow-Origin' $cors_allow_origin always;
+                add_header 'Access-Control-Allow-Credentials' 'true' always;
+                add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, PATCH, DELETE, OPTIONS' always;
+                add_header 'Access-Control-Allow-Headers' $cors_allow_headers always;
+                add_header 'Access-Control-Max-Age' 3600;
+                add_header 'Vary' 'Origin' always;
+                add_header 'Content-Length' 0;
+                add_header 'Content-Type' 'text/plain';
+                return 204;
+            }
+
+            proxy_pass ${API_BASE_URL}${API_PATH}/;
+            proxy_set_header Host ${API_HOST};
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_ssl_server_name on;
+
+            proxy_hide_header 'Access-Control-Allow-Origin';
+            proxy_hide_header 'Access-Control-Allow-Credentials';
+            proxy_hide_header 'Access-Control-Allow-Methods';
+            proxy_hide_header 'Access-Control-Allow-Headers';
+
+            add_header 'Access-Control-Allow-Origin' $cors_allow_origin always;
+            add_header 'Vary' 'Origin' always;
+            add_header 'Access-Control-Allow-Credentials' 'true' always;
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, PATCH, DELETE, OPTIONS' always;
+            add_header 'Access-Control-Allow-Headers' $cors_allow_headers always;
+
+            proxy_redirect ${API_BASE_URL}${API_PATH}/ /v1/;
+        }
+
+        location /oauth {
+            if ($request_method = OPTIONS) {
+                add_header 'Access-Control-Allow-Origin' $cors_allow_origin always;
+                add_header 'Access-Control-Allow-Credentials' 'true' always;
+                add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, PATCH, DELETE, OPTIONS' always;
+                add_header 'Access-Control-Allow-Headers' $cors_allow_headers always;
+                add_header 'Access-Control-Max-Age' 3600;
+                add_header 'Vary' 'Origin' always;
+                add_header 'Content-Length' 0;
+                add_header 'Content-Type' 'text/plain';
+                return 204;
+            }
+
+            proxy_pass ${OAUTH_BASE_URL}${OAUTH_PATH};
+            proxy_set_header Host ${OAUTH_HOST};
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_ssl_server_name on;
+
+            proxy_hide_header 'Access-Control-Allow-Origin';
+            proxy_hide_header 'Access-Control-Allow-Credentials';
+            proxy_hide_header 'Access-Control-Allow-Methods';
+            proxy_hide_header 'Access-Control-Allow-Headers';
+
+            add_header 'Access-Control-Allow-Origin' $cors_allow_origin always;
+            add_header 'Vary' 'Origin' always;
+            add_header 'Access-Control-Allow-Credentials' 'true' always;
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, PATCH, DELETE, OPTIONS' always;
+            add_header 'Access-Control-Allow-Headers' $cors_allow_headers always;
+
+            proxy_redirect ${OAUTH_BASE_URL}${OAUTH_PATH}/ /oauth/;
+        }
+
+        location / {
+            return 200 "Nginx dev proxy is running\n";
+        }
+    }
+}
+```
+
+#### 3. Update `docker-compose.yml` to use envsubst:
+
+```yaml
+version: "3.8"
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: dev-proxy
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.conf.template:/etc/nginx/templates/nginx.conf.template:ro
+    environment:
+      - API_BASE_URL=${API_BASE_URL:-https://app-asia.getdialog.dev}
+      - API_PATH=${API_PATH:-/api}
+      - API_HOST=${API_HOST:-app-asia.getdialog.dev}
+      - OAUTH_BASE_URL=${OAUTH_BASE_URL:-https://getdialog-dev.eu.auth0.com}
+      - OAUTH_PATH=${OAUTH_PATH:-/oauth}
+      - OAUTH_HOST=${OAUTH_HOST:-getdialog-dev.eu.auth0.com}
+    env_file:
+      - .env
+    networks:
+      - devnet
+    command: /bin/sh -c "envsubst '$$API_BASE_URL $$API_PATH $$API_HOST $$OAUTH_BASE_URL $$OAUTH_PATH $$OAUTH_HOST' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
+
+networks:
+  devnet:
+    driver: bridge
+```
+
+**Note:** The nginx:alpine image includes envsubst. If using nginx:latest, you may need to install gettext-base package or use a custom image.
+
+#### 4. Create `.env.example` file (for reference):
+
+```bash
+# API Configuration
+API_BASE_URL=https://app-asia.getdialog.dev
+API_PATH=/api
+API_HOST=app-asia.getdialog.dev
+
+# OAuth Configuration
+OAUTH_BASE_URL=https://getdialog-dev.eu.auth0.com
+OAUTH_PATH=/oauth
+OAUTH_HOST=getdialog-dev.eu.auth0.com
+```
+
+### Benefits of Using Environment Variables
+
+- **Environment-specific configs**: Use different API URLs for dev/staging/prod
+
+- **No code changes**: Switch environments by changing `.env` file
+
+- **Security**: Keep sensitive URLs in `.env` (add to `.gitignore`)
+
+- **Team collaboration**: Each developer can use their own `.env` file
+
+### Using Different Environments
+
+Create environment-specific files:
+
+- `.env.development`
+
+- `.env.staging`
+
+- `.env.production`
+
+Then use:
+
+```bash
+# Development
+docker-compose --env-file .env.development up -d
+
+# Staging
+docker-compose --env-file .env.staging up -d
+
+# Production
+docker-compose --env-file .env.production up -d
+```
+
+## How It Works
+
+### CORS Headers Configuration
+
+The nginx configuration handles CORS in two ways:
+
+1. **Preflight Requests (OPTIONS)**
+
+   - Intercepts OPTIONS requests
+
+   - Returns 204 with appropriate CORS headers
+
+   - Allows credentials and custom headers
+
+2. **Actual Requests**
+
+   - Hides upstream CORS headers
+
+   - Adds new CORS headers based on origin
+
+   - Supports credentials and custom headers
+
+### Origin Mapping
+
+The configuration allows requests from:
+
+- `localhost` (any port)
+
+- `127.0.0.1` (any port)
+
+- `*.localhost` subdomains
+
+## Common Issues & Solutions
+
+### Issue 1: CORS Error in Browser Console
+
+**Symptom:** `Access-Control-Allow-Origin` error
+
+**Solution:**
+
+1. Check if nginx container is running: `docker ps`
+
+2. Verify your frontend uses `http://localhost:8080` for API calls
+
+3. Check browser console for the exact origin being blocked
+
+### Issue 2: Preflight Request Failing
+
+**Symptom:** OPTIONS request returns 404 or wrong headers
+
+**Solution:**
+
+- Ensure the `if ($request_method = OPTIONS)` block is present in nginx.conf
+
+- Verify `Access-Control-Allow-Methods` includes all needed methods
+
+- Check that `Access-Control-Allow-Headers` includes custom headers
+
+### Issue 3: Credentials Not Working
+
+**Symptom:** Cookies/authentication not sent with requests
+
+**Solution:**
+
+- Ensure `Access-Control-Allow-Credentials: true` is set
+
+- In your frontend, set `withCredentials: true` in axios/fetch
+
+- Verify the origin is in the allowed list (not using wildcard `*`)
+
+### Issue 4: Custom Headers Blocked
+
+**Symptom:** Custom headers like `X-Lang`, `X-Project` are rejected
+
+**Solution:**
+
+- Add your custom headers to the `$cors_allow_headers` map in nginx.conf
+
+- Update the `Access-Control-Allow-Headers` to include them
+
+## Full Nginx Configuration
+
+Complete `nginx/nginx.conf` file (or `nginx/nginx.conf.template` if using environment variables):
+
+```nginx
+events {}
+
+http {
+    # CORS Origin Mapping
+    # Allows requests from localhost, 127.0.0.1, and *.localhost subdomains
+    map $http_origin $cors_allow_origin {
+        default $http_origin;
+        "" "";
+        "~^https?://localhost(:\d+)?/?$" $http_origin;
+        "~^https?://127\.0\.0\.1(:\d+)?/?$" $http_origin;
+        "~^https?://.*\.localhost(:\d+)?/?$" $http_origin;
+    }
+
+    # CORS Headers Mapping
+    # Handles custom headers like X-Lang, X-Project
+    map $http_access_control_request_headers $cors_allow_headers {
+        default $http_access_control_request_headers;
+        "" "Authorization, Content-Type, Origin, Accept, X-Requested-With, X-Lang, X-Project";
+    }
+
+    server {
+        listen 80;
+        server_name localhost;
+
+        # ✅ Proxy for your API
+        location /v1/ {
+            # Handle preflight OPTIONS requests
+            if ($request_method = OPTIONS) {
+                add_header 'Access-Control-Allow-Origin' $cors_allow_origin always;
+                add_header 'Access-Control-Allow-Credentials' 'true' always;
+                add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, PATCH, DELETE, OPTIONS' always;
+                add_header 'Access-Control-Allow-Headers' $cors_allow_headers always;
+                add_header 'Access-Control-Max-Age' 3600;
+                add_header 'Vary' 'Origin' always;
+                add_header 'Content-Length' 0;
+                add_header 'Content-Type' 'text/plain';
+                return 204;
+            }
+
+            # Proxy to target API
+            proxy_pass https://app-asia.getdialog.dev/api/;
+            proxy_set_header Host app-asia.getdialog.dev;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_ssl_server_name on;
+
+            # Hide upstream CORS headers and add our own
+            proxy_hide_header 'Access-Control-Allow-Origin';
+            proxy_hide_header 'Access-Control-Allow-Credentials';
+            proxy_hide_header 'Access-Control-Allow-Methods';
+            proxy_hide_header 'Access-Control-Allow-Headers';
+
+            # Add CORS headers for actual requests
+            add_header 'Access-Control-Allow-Origin' $cors_allow_origin always;
+            add_header 'Vary' 'Origin' always;
+            add_header 'Access-Control-Allow-Credentials' 'true' always;
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, PATCH, DELETE, OPTIONS' always;
+            add_header 'Access-Control-Allow-Headers' $cors_allow_headers always;
+
+            # Fix redirects to maintain proxy path
+            proxy_redirect https://app-asia.getdialog.dev/api/ /v1/;
+        }
+
+        # ✅ Proxy for OAuth service (handles both /oauth and /oauth/)
+        location /oauth {
+            # Handle preflight OPTIONS requests
+            if ($request_method = OPTIONS) {
+                add_header 'Access-Control-Allow-Origin' $cors_allow_origin always;
+                add_header 'Access-Control-Allow-Credentials' 'true' always;
+                add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, PATCH, DELETE, OPTIONS' always;
+                add_header 'Access-Control-Allow-Headers' $cors_allow_headers always;
+                add_header 'Access-Control-Max-Age' 3600;
+                add_header 'Vary' 'Origin' always;
+                add_header 'Content-Length' 0;
+                add_header 'Content-Type' 'text/plain';
+                return 204;
+            }
+
+            # Proxy to target OAuth API
+            proxy_pass https://getdialog-dev.eu.auth0.com/oauth;
+            proxy_set_header Host getdialog-dev.eu.auth0.com;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_ssl_server_name on;
+
+            # Hide upstream CORS headers and add our own
+            proxy_hide_header 'Access-Control-Allow-Origin';
+            proxy_hide_header 'Access-Control-Allow-Credentials';
+            proxy_hide_header 'Access-Control-Allow-Methods';
+            proxy_hide_header 'Access-Control-Allow-Headers';
+
+            # Add CORS headers for actual requests
+            add_header 'Access-Control-Allow-Origin' $cors_allow_origin always;
+            add_header 'Vary' 'Origin' always;
+            add_header 'Access-Control-Allow-Credentials' 'true' always;
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, PATCH, DELETE, OPTIONS' always;
+            add_header 'Access-Control-Allow-Headers' $cors_allow_headers always;
+
+            # Fix redirects to maintain proxy path
+            proxy_redirect https://getdialog-dev.eu.auth0.com/oauth/ /oauth/;
+        }
+
+        # Optional: show a simple message for root path
+        location / {
+            return 200 "Nginx dev proxy is running\n";
+        }
+    }
+}
+```
+
+### Configuration Breakdown
+
+**CORS Origin Mapping (****`$cors_allow_origin`****)**
+
+- Dynamically allows origins matching localhost patterns
+
+- Prevents unauthorized origins from accessing the API
+
+- Returns empty string for requests without origin header
+
+**CORS Headers Mapping (****`$cors_allow_headers`****)**
+
+- Handles custom headers like `X-Lang`, `X-Project`
+
+- Falls back to default headers if none specified
+
+- Ensures all required headers are allowed
+
+**Location Blocks**
+
+- `/v1/` - Proxies API requests to `app-asia.getdialog.dev`
+
+- `/oauth` - Proxies OAuth requests to `getdialog-dev.eu.auth0.com`
+
+- `/` - Health check endpoint
+
+**Key Features**
+
+- Preflight handling for OPTIONS requests
+
+- Credentials support for cookies/auth
+
+- SSL/TLS support with `proxy_ssl_server_name`
+
+- Redirect handling to maintain proxy paths
+
+## Configuration Details
+
+### Adding New Origins
+
+Edit `nginx/nginx.conf` and add to the `$cors_allow_origin` map:
+
+```nginx
+"~^https?://your-domain\.com(:\d+)?/?$" $http_origin;
+```
+
+### Adding New Headers
+
+Edit `nginx/nginx.conf` and update `$cors_allow_headers`:
+
+```nginx
+map $http_access_control_request_headers $cors_allow_headers {
+    default $http_access_control_request_headers;
+    "" "Authorization, Content-Type, Origin, Accept, X-Requested-With, X-Lang, X-Project, Your-New-Header";
+}
+```
+
+### Adding New Proxy Routes
+
+Add a new `location` block in `nginx/nginx.conf`:
+
+```nginx
+location /your-path/ {
+    # Copy the CORS handling pattern from existing locations
+    # Update proxy_pass to your target API
+}
+```
+
+## Testing CORS
+
+### Test Preflight Request
+
+```bash
+curl -X OPTIONS http://localhost:8080/v1/endpoint \
+  -H "Origin: http://localhost:5173" \
+  -H "Access-Control-Request-Method: POST" \
+  -H "Access-Control-Request-Headers: Content-Type" \
+  -v
+```
+
+### Test Actual Request
+
+```bash
+curl -X POST http://localhost:8080/v1/endpoint \
+  -H "Origin: http://localhost:5173" \
+  -H "Content-Type: application/json" \
+  -v
+```
+
+## Restart After Changes
+
+After modifying `nginx/nginx.conf`:
+
+```bash
+docker-compose restart nginx
+```
+
+Or rebuild:
+
+```bash
+docker-compose down
+docker-compose up -d
+```
+
+## Troubleshooting Checklist
+
+- Nginx container is running (`docker ps`)
+
+- Port 8080 is not in use by another service
+
+- Frontend is using the correct proxy URL (`localhost:8080`)
+
+- Origin matches the allowed patterns in nginx.conf
+
+- Custom headers are listed in `Access-Control-Allow-Headers`
+
+- Credentials are enabled if using cookies/auth
+
+- Browser cache is cleared (hard refresh: Cmd+Shift+R / Ctrl+Shift+R)
+
+## Additional Resources
+
+- [MDN CORS Documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS)
+
+- [Nginx CORS Configuration](https://enable-cors.org/server_nginx.html)
+

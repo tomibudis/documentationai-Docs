@@ -1,0 +1,241 @@
+---
+title: Cloudflare R2
+---
+# Description
+
+Cloudflare R2 is an object storage service that provides S3-compatible API access for storing and retrieving large amounts of unstructured data. Unlike traditional object storage solutions, R2 eliminates egress fees (data transfer costs), making it an attractive option for applications that serve significant amounts of data to users. Built on Cloudflare's global network, R2 ensures low-latency access to stored objects from anywhere in the world.
+
+R2 is designed to be a drop-in replacement for AWS S3, allowing developers to migrate existing applications with minimal code changes while benefiting from Cloudflare's edge network infrastructure.
+
+## Benefits
+
+### Free Egress (Data Transfer Out)
+
+- **Zero egress fees**: Unlike AWS S3 and other providers, R2 doesn't charge for data transfer out of the storage buckets. This makes it ideal for applications serving high volumes of content like videos, images, or large datasets.
+
+### S3 API Compatibility
+
+- **Drop-in replacement**: R2 is fully compatible with the S3 API, meaning existing code, libraries, and tools that work with S3 will work with R2 without modification.
+
+- **Easy migration**: Transitioning from S3 to R2 typically requires only changing the endpoint URL and credentials.
+
+### Global Edge Network
+
+- **Low latency**: Leverages Cloudflare's extensive edge network (300+ data centers) to serve content closer to end users.
+
+- **Better performance**: Reduced latency improves user experience, especially for applications serving media files or large datasets.
+
+### Cost-Effective Storage
+
+- **Transparent pricing**: Simple, predictable pricing model without hidden fees.
+
+- **No minimum charges**: Pay only for what you use.
+
+- **Cost-effective for high-traffic applications**: When serving large amounts of data, R2 can be significantly cheaper than competitors due to zero egress fees.
+
+### Integration with Cloudflare Ecosystem
+
+- **Workers integration**: Seamlessly integrates with Cloudflare Workers for serverless compute at the edge.
+
+- **CDN integration**: Works with Cloudflare's CDN and other services for a complete edge computing solution.
+
+### No Vendor Lock-in
+
+- **S3-compatible**: Since it uses S3 API, you're not locked into Cloudflare's ecosystem and can easily migrate to other S3-compatible services if needed.
+
+## Pros and Cons
+
+### Pros
+
+1. **Zero Egress Fees**: The biggest advantage - no charges for data transfer out, saving significant costs for high-traffic applications.
+
+2. **S3 API Compatibility**: Works with existing S3 tools, SDKs, and libraries without modification.
+
+3. **Global Edge Network**: Content is served from locations closest to users, reducing latency.
+
+4. **Simple Pricing**: Predictable costs without complex tier structures.
+
+5. **High Availability**: Built on Cloudflare's reliable infrastructure with high uptime guarantees.
+
+6. **Workers Integration**: Can be used seamlessly with Cloudflare Workers for edge computing.
+
+7. **Automatic HTTPS**: All data is served over HTTPS by default.
+
+8. **Large File Support**: Supports files up to 5TB in size.
+
+9. **Lifecycle Management**: Supports object lifecycle policies for automatic deletion or transitions.
+
+10. **Custom Domains**: Ability to serve content from your own domain.
+
+### Cons
+
+1. **Limited Maturity**: Relatively new service compared to AWS S3, may have fewer features or edge cases.
+
+2. **Regional Availability**: While globally distributed, some regions may have limitations or restrictions.
+
+3. **Ecosystem Limitations**: Smaller ecosystem compared to AWS S3 in terms of third-party tools and integrations.
+
+4. **No Glacier/Archive Tier**: Lacks the deep archive storage tiers available in AWS S3 Glacier.
+
+5. **Storage Costs**: Storage pricing might not always be the cheapest for very low-traffic use cases where egress costs aren't a factor.
+
+6. **Learning Curve**: If you're not already familiar with S3, there's still a learning curve.
+
+7. **Feature Parity**: May lack some advanced features available in mature S3 implementations.
+
+8. **Support**: Support quality may vary compared to established providers like AWS.
+
+## When to Use It?
+
+### Ideal Use Cases
+
+1. **Content-Heavy Applications**
+
+   - Video streaming platforms
+
+   - Image galleries or portfolios
+
+   - Podcast hosting
+
+   - Software download repositories
+
+   - Game asset hosting
+
+2. **High-Traffic Websites**
+
+   - Applications serving large volumes of static assets
+
+   - CDN origin storage
+
+   - Media-rich websites
+
+3. **Cost-Sensitive Projects**
+
+   - Startups with limited budgets but high data transfer needs
+
+   - Open source projects
+
+   - Educational or non-profit applications
+
+4. **Cloudflare Ecosystem Users**
+
+   - Already using Cloudflare Workers, Pages, or CDN
+
+   - Want integrated edge computing solutions
+
+5. **S3 Migration Projects**
+
+   - Looking to reduce costs by eliminating egress fees
+
+   - Want S3 compatibility without vendor lock-in concerns
+
+6. **Developer Tools & Backups**
+
+   - Application backups
+
+   - Log storage and archival
+
+   - CI/CD artifacts storage
+
+### When NOT to Use It
+
+1. **Deep Archive Needs**: If you need Glacier-like cold storage for long-term archival.
+
+2. **Enterprise Features**: If you require enterprise-specific features only available in AWS S3.
+
+3. **Compliance Requirements**: If your organization has strict compliance needs that R2 doesn't yet support.
+
+4. **Low-Traffic Applications**: If you're serving minimal data, traditional storage might be simpler and cheaper.
+
+5. **Specific AWS Integrations**: If you rely heavily on AWS-specific services and integrations.
+
+## Comparison with Other Relevant Tools
+
+### Cloudflare R2 vs AWS S3
+
+| Feature               | Cloudflare R2                                | AWS S3                                |
+| --------------------- | -------------------------------------------- | ------------------------------------- |
+| **Egress Fees**       | Free                                         | Charged per GB                        |
+| **Storage Pricing**   | $0.015/GB/month                              | $0.023/GB/month (Standard)            |
+| **API Compatibility** | S3-compatible                                | Native S3 API                         |
+| **Global Network**    | 300+ edge locations                          | Global but separate from edge network |
+| **Integration**       | Cloudflare Workers                           | AWS Lambda, extensive AWS ecosystem   |
+| **Maturity**          | Newer (2021)                                 | Mature (2006)                         |
+| **Archive Tiers**     | Limited                                      | Glacier, Deep Archive                 |
+| **Request Pricing**   | $4.50/million Class A, $0.36/million Class B | Similar or slightly higher            |
+| **Best For**          | High egress, cost-sensitive                  | Enterprise, AWS ecosystem             |
+
+**Winner**: R2 for high-traffic content delivery; S3 for enterprise features and AWS integration.
+
+### Cloudflare R2 vs Google Cloud Storage (GCS)
+
+| Feature             | Cloudflare R2                  | Google Cloud Storage             |
+| ------------------- | ------------------------------ | -------------------------------- |
+| **Egress Fees**     | Free                           | Charged, but some free tier      |
+| **Storage Pricing** | $0.015/GB/month                | $0.020/GB/month (Standard)       |
+| **API**             | S3-compatible                  | S3-compatible + GCS API          |
+| **Network**         | Edge-optimized                 | Google's global network          |
+| **Integration**     | Cloudflare ecosystem           | Google Cloud ecosystem           |
+| **CDN**             | Built-in edge network          | Cloud CDN (separate service)     |
+| **Best For**        | Content delivery, cost savings | Google Cloud users, ML workloads |
+
+**Winner**: R2 for zero egress; GCS for Google Cloud integrations and ML.
+
+### Cloudflare R2 vs DigitalOcean Spaces
+
+| Feature               | Cloudflare R2       | DigitalOcean Spaces                |
+| --------------------- | ------------------- | ---------------------------------- |
+| **Egress Fees**       | Free                | Free (in most regions)             |
+| **Storage Pricing**   | $0.015/GB/month     | $5/month for 250GB                 |
+| **API Compatibility** | S3-compatible       | S3-compatible                      |
+| **Network**           | Global edge network | Limited regions                    |
+| **Integration**       | Cloudflare Workers  | DigitalOcean ecosystem             |
+| **CDN**               | Built-in            | Separate CDN service               |
+| **Scalability**       | Highly scalable     | Good, but smaller scale            |
+| **Best For**          | Global distribution | Simpler setups, DigitalOcean users |
+
+**Winner**: R2 for global scale and edge benefits; Spaces for simpler, regional needs.
+
+### Cloudflare R2 vs Azure Blob Storage
+
+| Feature             | Cloudflare R2                | Azure Blob Storage                        |
+| ------------------- | ---------------------------- | ----------------------------------------- |
+| **Egress Fees**     | Free                         | Charged (first 5GB/month free)            |
+| **Storage Pricing** | $0.015/GB/month              | $0.0184/GB/month (Hot tier)               |
+| **API**             | S3-compatible                | REST API, some S3 compatibility           |
+| **Integration**     | Cloudflare Workers           | Azure Functions, extensive Azure services |
+| **CDN**             | Built-in edge                | Azure CDN (separate)                      |
+| **Best For**        | Cost savings, edge computing | Microsoft ecosystem, enterprise           |
+
+**Winner**: R2 for egress savings; Azure for Microsoft/Azure integrations.
+
+### Cloudflare R2 vs Backblaze B2
+
+| Feature               | Cloudflare R2             | Backblaze B2                            |
+| --------------------- | ------------------------- | --------------------------------------- |
+| **Egress Fees**       | Free                      | Free (first 1GB/day, then $0.01/GB)     |
+| **Storage Pricing**   | $0.015/GB/month           | $0.005/GB/month                         |
+| **API Compatibility** | S3-compatible             | S3-compatible                           |
+| **Network**           | Global edge network       | Limited regions                         |
+| **CDN**               | Built-in                  | Via partners (separate cost)            |
+| **Best For**          | High egress, global reach | Very low-cost storage, backup use cases |
+
+**Winner**: R2 for unlimited free egress and edge; B2 for pure storage cost optimization.
+
+## Conclusion
+
+Cloudflare R2 is an excellent choice for developers and organizations looking to reduce costs while maintaining S3 compatibility and leveraging global edge infrastructure. Its **zero egress fees** make it particularly attractive for applications that serve high volumes of content, potentially saving thousands of dollars compared to traditional object storage providers.
+
+**Key Takeaways:**
+
+- **Best suited for**: Content-heavy applications, high-traffic websites, cost-sensitive projects, and those already in the Cloudflare ecosystem.
+
+- **Main advantage**: Elimination of egress fees combined with S3 compatibility.
+
+- **Main limitation**: Relatively new service with potentially fewer features compared to established providers.
+
+- **Migration**: Easy migration path from S3 due to API compatibility.
+
+While R2 may not be the perfect fit for every use case (especially those requiring deep archive storage or specific enterprise features), it represents a significant value proposition for the majority of modern web applications. As the service matures and adds more features, it's likely to become an even more compelling alternative to traditional object storage solutions.
+
+For most developers building content-rich applications or serving large amounts of data, Cloudflare R2 offers a compelling combination of cost savings, performance, and ease of use that makes it worth serious consideration.
