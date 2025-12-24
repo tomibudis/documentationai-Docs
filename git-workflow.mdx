@@ -1,157 +1,1030 @@
 ---
-title: Site Configuration
-description: Learn how to configure and personalize your HelloToms portfolio to reflect your unique work and style.
+title: Git Workflow
+---
+This document covers the complete git workflow for this project, including branching strategies, commit conventions, pre-commit hooks, pull request best practices, and merge strategies.
+
+## Table of Contents
+
+1. [Creating Branches](#creating-branches)
+
+2. [Commit Conventions](#commit-conventions)
+
+3. [Pre-commit Hooks](#pre-commit-hooks)
+
+4. [Biome Linting & Formatting](#biome-linting--formatting)
+
+5. [Creating Pull Requests](#creating-pull-requests)
+
+6. [VSCode GitHub Extension](#vscode-github-extension)
+
+7. [Merge Strategies](#merge-strategies)
+
 ---
 
-## Overview
+## Creating Branches
 
-Customize HelloToms to match your brand and showcase your projects effectively. Adjust themes, colors, content, navigation, and deployment settings through simple configuration files and editable sections. Start with the basics and scale to advanced customizations.
+### Branch Naming Convention
 
-<Columns cols={3}>
-  <Card title="Theme Settings" icon="palette" href="#theme-settings">
-    Change colors and layouts quickly.
-  </Card>
-  <Card title="Content Editing" icon="edit-3" href="#content-editing">
-    Update your bio, projects, and blog.
-  </Card>
-  <Card title="Deployment" icon="upload-cloud" href="#deployment">
-    Host on your preferred platform.
-  </Card>
-</Columns>
+Follow this pattern for branch names:
 
-## Theme and Color Settings
+```
+<type>/<description>
+```
 
-Modify the site's appearance in `src/config/theme.json`. Set your primary color to `#c53544` for the HelloToms brand.
+**Types:**
 
-<CodeGroup tabs="JSON,YAML">
+- `feat/` - New features
+
+- `fix/` - Bug fixes
+
+- `docs/` - Documentation changes
+
+- `refactor/` - Code refactoring
+
+- `test/` - Adding or updating tests
+
+- `chore/` - Maintenance tasks
+
+- `perf/` - Performance improvements
+
+**Examples:**
+
+```bash
+feat/user-authentication
+fix/login-validation-error
+docs/api-documentation
+refactor/inbox-component
+test/user-login-flow
+chore/update-dependencies
+perf/optimize-render-cycle
+```
+
+### Creating a New Branch
+
+#### From Main/Master Branch
+
+```bash
+# Ensure you're on the latest main branch
+git checkout main
+git pull origin main
+
+# Create and switch to a new branch
+git checkout -b feat/your-feature-name
+
+# Or using the newer git switch command
+git switch -c feat/your-feature-name
+```
+
+#### From Another Branch
+
+```bash
+# If you need to branch from a feature branch
+git checkout existing-feature-branch
+git pull origin existing-feature-branch
+git checkout -b feat/new-feature-from-existing
+```
+
+### Branch Best Practices
+
+1. **Always start from updated main**: Pull latest changes before creating a branch
+
+2. **Keep branches focused**: One feature/fix per branch
+
+3. **Keep branches short-lived**: Merge or delete branches after completion
+
+4. **Use descriptive names**: Make it clear what the branch does
+
+---
+
+## Commit Conventions
+
+This project uses [Conventional Commits](https://www.conventionalcommits.org/) specification.
+
+### Commit Message Format
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+### Commit Types
+
+Based on `commitlint.config.js`, the following types are allowed:
+
+- `feat`: A new feature
+
+- `fix`: A bug fix
+
+- `docs`: Documentation only changes
+
+- `style`: Changes that do not affect the meaning of the code (formatting, missing semicolons, etc.)
+
+- `refactor`: Code change that neither fixes a bug nor adds a feature
+
+- `perf`: A code change that improves performance
+
+- `test`: Adding missing tests or correcting existing tests
+
+- `build`: Changes that affect the build system or external dependencies
+
+- `ci`: Changes to CI configuration files and scripts
+
+- `chore`: Other changes that don't modify src or test files
+
+- `revert`: Reverts a previous commit
+
+### Examples
+
+**Simple commit:**
+
+```bash
+git commit -m "feat: add user authentication"
+git commit -m "fix: resolve login validation error"
+git commit -m "docs: update API documentation"
+```
+
+**Commit with scope:**
+
+```bash
+git commit -m "feat(inbox): add bulk archive functionality"
+git commit -m "fix(auth): correct password validation logic"
+```
+
+**Commit with body:**
+
+```bash
+git commit -m "feat: add dark mode toggle
+
+- Implement dark mode context provider
+- Add theme toggle button in navbar
+- Update all components to support dark theme"
+```
+
+**Breaking change:**
+
+```bash
+git commit -m "feat(api): change authentication endpoint
+
+BREAKING CHANGE: Authentication endpoint moved from /auth/login to /api/v1/auth/login"
+```
+
+### Running Commitlint Manually
+
+If you want to validate a commit message before committing:
+
+```bash
+# Test your commit message
+echo "feat: add new feature" | npx commitlint
+
+# Or validate a commit file
+npx commitlint --edit .git/COMMIT_EDITMSG
+```
+
+---
+
+## Pre-commit Hooks
+
+This project uses **Husky** to manage git hooks. The hooks are automatically set up when you run `npm install` (via the `prepare` script).
+
+### Available Hooks
+
+#### 1. Pre-commit Hook (`.husky/pre-commit`)
+
+**What it does:**
+
+- Runs `lint-staged` before allowing a commit
+
+- Automatically formats and lints staged files using Biome
+
+- Only processes files that are staged for commit
+
+**What gets checked:**
+
+- JavaScript/TypeScript files (`.js`, `.jsx`, `.ts`, `.tsx`): Runs `biome check --write`
+
+- JSON/Markdown files: Runs `biome format --write` (excludes `package-lock.json`)
+
+**If it fails:**
+
+- The commit is blocked
+
+- Fix the issues shown in the output
+
+- Stage the fixed files again
+
+- Try committing again
+
+**Manual execution:**
+
+```bash
+# Run lint-staged manually
+npx lint-staged
+
+# Or run the pre-commit hook directly
+.husky/pre-commit
+```
+
+#### 2. Commit-msg Hook (`.husky/commit-msg`)
+
+**What it does:**
+
+- Validates commit messages using Commitlint
+
+- Ensures commit messages follow Conventional Commits format
+
+- Blocks commits with invalid messages
+
+**If it fails:**
+
+- The commit is rejected
+
+- You'll see an error message explaining what's wrong
+
+- Fix your commit message and try again
+
+**Manual execution:**
+
+```bash
+# Validate a commit message
+echo "your commit message" | npx commitlint
+
+# Or validate the last commit message
+npx commitlint --from HEAD~1 --to HEAD --verbose
+```
+
+### Bypassing Hooks (Not Recommended)
+
+**⚠️ Warning:** Only bypass hooks in emergencies. It's better to fix the issues.
+
+```bash
+# Skip pre-commit hook
+git commit --no-verify -m "your message"
+
+# Skip all hooks
+git commit --no-verify --no-gpg-sign -m "your message"
+```
+
+### Troubleshooting Hooks
+
+**Hooks not running?**
+
+```bash
+# Reinstall husky hooks
+npm run prepare
+
+# Or manually
+npx husky install
+```
+
+**Hooks running but not working?**
+
+```bash
+# Check if hooks are executable
+ls -la .husky/
+
+# Make hooks executable if needed
+chmod +x .husky/pre-commit
+chmod +x .husky/commit-msg
+```
+
+---
+
+## Biome Linting & Formatting
+
+This project uses **Biome** for both linting and formatting (replacing ESLint and Prettier).
+
+### Configuration
+
+The Biome configuration is in `biome.json`. Key settings:
+
+- **Formatter**: Enabled with 2-space indentation, 100 character line width
+
+- **Linter**: Enabled with recommended rules plus custom rules
+
+- **Organize Imports**: Automatically organizes imports
+
+### Manual Commands
+
+```bash
+# Check for linting and formatting issues (read-only)
+npm run check
+
+# Fix linting and formatting issues automatically
+npm run check:fix
+
+# Lint only (read-only)
+npm run lint
+
+# Fix linting issues only
+npm run lint:fix
+
+# Format only (read-only)
+npm run format:check
+
+# Format files automatically
+npm run format
+```
+
+### What Gets Checked
+
+**Linting Rules:**
+
+- Complexity issues (extra boolean casts, useless catch, etc.)
+
+- Correctness (unused variables)
+
+- Style (namespace usage, const assertions)
+
+- Suspicious patterns (explicit `any`, `with` statements)
+
+**Formatting:**
+
+- Indentation (2 spaces)
+
+- Line width (100 characters)
+
+- Quote style (single quotes for JavaScript)
+
+- Trailing commas (ES5 style)
+
+### Integration with Pre-commit
+
+Biome automatically runs on staged files via `lint-staged`:
+
+- **Before commit**: Only staged files are checked and auto-fixed
+
+- **Auto-fix**: Files are automatically formatted and linted
+
+- **If issues remain**: Commit is blocked until you fix them
+
+### VSCode Integration
+
+For the best experience, install the Biome VSCode extension:
+
+1. Open VSCode Extensions (Cmd+Shift+X)
+
+2. Search for "Biome"
+
+3. Install "Biome" by biomejs
+
+4. Enable format on save in your settings:
+
 ```json
 {
-  "primaryColor": "#c53544",
-  "secondaryColor": "#2d3748",
-  "fontFamily": "Inter, sans-serif",
-  "theme": "dark"
+  "editor.defaultFormatter": "biomejs.biome",
+  "editor.formatOnSave": true,
+  "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  }
 }
 ```
 
-```yaml
-primaryColor: "#c53544"
-secondaryColor: "#2d3748"
-fontFamily: "Inter, sans-serif"
-theme: dark
+---
+
+## Creating Pull Requests
+
+### Before Creating a PR
+
+1. **Ensure your branch is up to date:**
+
+   ```bash
+   git checkout main
+   git pull origin main
+   git checkout your-feature-branch
+   git merge main
+   # Or rebase (see merge strategies section)
+   git rebase main
+   ```
+
+2. **Run all checks locally:**
+
+   ```bash
+   # Run type checking
+   npm run build
+
+   # Run linting and formatting
+   npm run check
+
+   # Fix any issues
+   npm run check:fix
+   ```
+
+3. **Push your branch:**
+
+   ```bash
+   git push origin your-feature-branch
+   ```
+
+### PR Title Best Practices
+
+**Format:**
+
 ```
-</CodeGroup>
+<type>(<scope>): <description>
+```
 
-<Callout kind="tip">
-Test color changes locally with `npm run dev` before deploying.
-</Callout>
+**Good Examples:**
 
-<Steps>
-  <Step title="Update Theme File" icon="edit">
-    Open `src/config/theme.json` and replace the `primaryColor` value.
-  </Step>
-  <Step title="Restart Server" icon="refresh-cw">
-    Run `npm run dev` to preview changes.
-  </Step>
-  <Step title="Verify" icon="check-circle">
-    Check the navbar and buttons for your new color.
-  </Step>
-</Steps>
+- `feat(inbox): add bulk archive functionality`
 
-## Content Editing
+- `fix(auth): resolve login validation error`
 
-Edit Markdown files in `src/content/` to personalize sections. Use frontmatter for metadata like titles and dates.
+- `refactor(components): simplify inbox list rendering`
 
-<Tabs>
-  <Tab title="Projects" icon="folder">
-    Update `src/content/projects/my-project.mdx`:
+- `docs(readme): update installation instructions`
 
-````mdx
+- `perf(api): optimize data fetching with caching`
+
+**Bad Examples:**
+
+- `Update code` ❌ (too vague)
+
+- `fix bug` ❌ (not descriptive)
+
+- `WIP` ❌ (use draft PR instead)
+
+- `feat: new feature` ❌ (too generic)
+
+### PR Description Template
+
+Use this template for comprehensive PR descriptions:
+
+```markdown
+## Description
+Brief description of what this PR does and why.
+
+## Type of Change
+- [ ] Bug fix (non-breaking change which fixes an issue)
+- [ ] New feature (non-breaking change which adds functionality)
+- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
+- [ ] Documentation update
+- [ ] Refactoring (no functional changes)
+- [ ] Performance improvement
+
+## Related Issues
+Closes #123
+Related to #456
+
+## Changes Made
+- Change 1
+- Change 2
+- Change 3
+
+## Testing
+- [ ] Unit tests added/updated
+- [ ] Manual testing completed
+- [ ] Tested in different browsers (if applicable)
+
+## Screenshots (if applicable)
+Add screenshots or GIFs to help explain your changes.
+
+## Checklist
+- [ ] Code follows project style guidelines
+- [ ] Self-review completed
+- [ ] Comments added for complex code
+- [ ] Documentation updated (if needed)
+- [ ] No new warnings generated
+- [ ] Tests pass locally
+- [ ] Branch is up to date with main
+```
+
+### PR Best Practices
+
+1. **Keep PRs focused**: One feature/fix per PR
+
+2. **Keep PRs small**: Easier to review and merge
+
+3. **Write clear descriptions**: Help reviewers understand the changes
+
+4. **Link related issues**: Use "Closes #123" or "Fixes #123"
+
+5. **Request specific reviewers**: Tag relevant team members
+
+6. **Respond to feedback**: Address review comments promptly
+
+7. **Keep branch updated**: Rebase or merge main regularly
+
 ---
-title: "E-commerce App"
-description: "Built with Next.js and Stripe"
-tech: ["Next.js", "Tailwind", "Stripe"]
----
 
-Redesigned checkout flow reducing cart abandonment by 30%.
-````
+## VSCode GitHub Extension
 
-  </Tab>
-  <Tab title="Bio" icon="user">
-    Modify `src/content/about.mdx`:
+The **GitHub Pull Requests and Issues** extension speeds up your PR workflow significantly.
 
-````mdx
----
-title: "Tom Budi"
-role: "Senior Software Engineer"
----
+### Installation
 
-10+ years in web and mobile development.
-````
+1. Open VSCode Extensions (Cmd+Shift+X)
 
-  </Tab>
-</Tabs>
+2. Search for "GitHub Pull Requests and Issues"
 
-## Navigation Setup
+3. Install the official extension by GitHub
 
-Configure the header and footer menus in `src/config/navigation.json`. Add or reorder links to match your structure.
+### Authentication
+
+1. Open Command Palette (Cmd+Shift+P)
+
+2. Type "GitHub: Sign in"
+
+3. Follow the authentication flow
+
+4. Grant necessary permissions
+
+### Key Features
+
+#### 1. Create PR from VSCode
+
+**Method 1: Command Palette**
+
+```
+Cmd+Shift+P → "GitHub Pull Requests: Create Pull Request"
+```
+
+**Method 2: Source Control Panel**
+
+- After pushing a branch, click the notification
+
+- Or click the GitHub icon in the Source Control sidebar
+
+- Click "Create Pull Request"
+
+#### 3. Review PRs in VSCode
+
+- Open Command Palette → "GitHub Pull Requests: Focus on Pull Requests"
+
+- Browse all PRs in the sidebar
+
+- Click on a PR to see files changed
+
+- Add comments directly in the code
+
+- Approve or request changes
+
+#### 4. Checkout PR Locally
+
+- Right-click on a PR in the sidebar
+
+- Select "Checkout Pull Request"
+
+- Review and test locally
+
+- Push changes directly to the PR branch
+
+#### 5. Inline Comments
+
+- Click on any line in a PR file view
+
+- Add comments with `Cmd+Shift+P → "Add Comment"`
+
+- Mention reviewers with `@username`
+
+- Submit review when done
+
+#### 6. Quick Actions
+
+- **Merge PR**: Right-click PR → "Merge Pull Request"
+
+- **Close PR**: Right-click PR → "Close Pull Request"
+
+- **Add Reviewers**: Click "Add Reviewers" button
+
+- **Add Labels**: Click "Add Labels" button
+
+### Keyboard Shortcuts
+
+- `Cmd+Shift+P → GitHub Pull Requests: Focus on Pull Requests` - Open PR view
+
+- `Cmd+Shift+P → GitHub Pull Requests: Create Pull Request` - Create new PR
+
+- `Cmd+Shift+P → GitHub Pull Requests: Sign in` - Authenticate
+
+### Settings
+
+Add these to your VSCode settings for better experience:
 
 ```json
 {
-  "header": [
-    { "label": "Home", "href": "/" },
-    { "label": "Projects", "href": "/projects" },
-    { "label": "Blog", "href": "/blog" },
-    { "label": "Contact", "href": "/contact" }
+  "githubPullRequests.queries": [
+    {
+      "label": "Assigned To Me",
+      "query": "is:open assignee:@me"
+    },
+    {
+      "label": "Created By Me",
+      "query": "is:open author:@me"
+    },
+    {
+      "label": "Needs Review",
+      "query": "is:open review-requested:@me"
+    }
   ],
-  "footer": [
-    { "label": "GitHub", "href": "https://github.com/tombudi" }
-  ]
+  "githubPullRequests.defaultMergeMethod": "squash",
+  "githubPullRequests.createOnPublishBranch": true
 }
 ```
 
-<Expandable title="Advanced: Custom Icons" default-open="false">
-Add Lucide icons to nav items:
+---
 
-```json
-{ "label": "Projects", "href": "/projects", "icon": "code" }
+## Merge Strategies
+
+Understanding merge strategies is crucial for maintaining a clean git history.
+
+### 1. Fast-Forward Merge
+
+**What it is:**
+
+- The simplest merge strategy
+
+- Moves the branch pointer forward without creating a merge commit
+
+- Only works when the target branch hasn't diverged
+
+**When to use:**
+
+- ✅ Feature branches that are directly ahead of main
+
+- ✅ When you want a linear history
+
+- ✅ Small, focused branches
+
+- ✅ When the branch hasn't been shared with others
+
+**How it works:**
+
 ```
-</Expandable>
+Before:
+main:    A---B---C
+                \
+feature:         D---E
 
-## Deployment Options
+After (fast-forward):
+main:    A---B---C---D---E
+```
 
-Deploy HelloToms to modern platforms. Follow these platform-specific steps.
+**Commands:**
 
-<Tabs>
-  <Tab title="Vercel" icon="zap">
-    <Steps>
-      <Step title="Connect Repo">
-        Push to GitHub, then import in Vercel dashboard.
-      </Step>
-      <Step title="Set Build">
-        Build command: `npm run build`<br/>Output: `dist`
-      </Step>
-    </Steps>
-  </Tab>
-  <Tab title="Netlify" icon="cloud">
-    <Steps>
-      <Step title="Drag & Drop">
-        Drag `dist` folder to Netlify deploy page.
-      </Step>
-      <Step title="Auto Deploy">
-        Connect GitHub repo for continuous deployment.
-      </Step>
-    </Steps>
-  </Tab>
-  <Tab title="GitHub Pages" icon="github">
-    ```bash
-    npm run build
-    git subtree push --prefix dist origin gh-pages
-    ```
-  </Tab>
-</Tabs>
+```bash
+git checkout main
+git merge feature-branch
+# If fast-forward is possible, it happens automatically
+# If not, use: git merge --ff-only feature-branch
+```
 
-<Callout kind="alert">
-Always commit changes and push to your repository before deploying.
-</Callout>
+**Pros:**
 
-These configurations make your portfolio uniquely yours. Experiment locally, then deploy confidently.
+- Clean, linear history
+
+- Easy to understand
+
+- No merge commits cluttering history
+
+**Cons:**
+
+- Only works when branches haven't diverged
+
+- Loses information about when feature was merged
+
+- Can't see branch boundaries in history
+
+### 2. Merge Commit (No Fast-Forward)
+
+**What it is:**
+
+- Always creates a merge commit, even if fast-forward is possible
+
+- Preserves branch history and boundaries
+
+**When to use:**
+
+- ✅ When you want to preserve branch information
+
+- ✅ Feature branches that have been shared
+
+- ✅ When multiple people work on the same branch
+
+- ✅ When you want to see when features were merged
+
+**How it works:**
+
+```
+Before:
+main:    A---B---C
+                \
+feature:         D---E
+
+After (merge commit):
+main:    A---B---C-------M
+                \       /
+feature:         D---E
+```
+
+**Commands:**
+
+```bash
+git checkout main
+git merge --no-ff feature-branch
+```
+
+**Pros:**
+
+- Preserves branch history
+
+- Clear indication of when features were merged
+
+- Easy to revert entire features
+
+**Cons:**
+
+- Creates merge commits
+
+- Can clutter history with many merge commits
+
+- More complex history graph
+
+### 3. Rebase and Merge
+
+**What it is:**
+
+- Replays commits from feature branch onto main
+
+- Creates a linear history
+
+- Rewrites commit history
+
+**When to use:**
+
+- ✅ Feature branches that haven't been shared
+
+- ✅ When you want a clean, linear history
+
+- ✅ Before merging to main
+
+- ✅ Personal feature branches
+
+**When NOT to use:**
+
+- ❌ Shared branches (others may have based work on them)
+
+- ❌ Public branches that others depend on
+
+- ❌ When you want to preserve exact commit history
+
+**How it works:**
+
+```
+Before:
+main:    A---B---C
+                \
+feature:         D---E
+
+After (rebase):
+main:    A---B---C
+                \
+feature:             D'---E'
+
+After (merge with fast-forward):
+main:    A---B---C---D'---E'
+```
+
+**Commands:**
+
+```bash
+# Rebase your feature branch onto main
+git checkout feature-branch
+git rebase main
+
+# Resolve any conflicts
+git add .
+git rebase --continue
+
+# Then merge (will be fast-forward)
+git checkout main
+git merge feature-branch
+```
+
+**Pros:**
+
+- Clean, linear history
+
+- Easier to read and understand
+
+- No merge commits
+
+**Cons:**
+
+- Rewrites history (can cause issues if shared)
+
+- More complex conflict resolution
+
+- Loses original commit timestamps
+
+### 4. Squash and Merge
+
+**What it is:**
+
+- Combines all commits from feature branch into a single commit
+
+- Adds that commit to main
+
+- Preserves branch history in PR
+
+**When to use:**
+
+- ✅ Feature branches with many small commits
+
+- ✅ When you want to clean up commit history
+
+- ✅ When individual commits aren't important
+
+- ✅ Most common for GitHub PRs
+
+**How it works:**
+
+```
+Before:
+main:    A---B---C
+                \
+feature:         D---E---F---G
+
+After (squash and merge):
+main:    A---B---C---H
+         (H contains all changes from D, E, F, G)
+```
+
+**Commands:**
+
+```bash
+git checkout main
+git merge --squash feature-branch
+git commit -m "feat: complete feature description"
+```
+
+**Pros:**
+
+- Clean main branch history
+
+- One commit per feature
+
+- Easy to understand what was added
+
+**Cons:**
+
+- Loses individual commit history
+
+- Can't see development process
+
+- Harder to revert specific changes
+
+### Comparison Table
+
+| Strategy         | History  | Merge Commits | Use Case          | Best For       |
+| ---------------- | -------- | ------------- | ----------------- | -------------- |
+| **Fast-Forward** | Linear   | No            | Simple branches   | Small features |
+| **Merge Commit** | Branched | Yes           | Shared branches   | Team features  |
+| **Rebase**       | Linear   | No            | Personal branches | Clean history  |
+| **Squash**       | Linear   | No            | Many commits      | PR workflows   |
+
+### Recommended Strategy for This Project
+
+**For Feature Branches:**
+
+1. **During development**: Use rebase to keep your branch updated
+
+   ```bash
+   git checkout feature-branch
+   git rebase main
+   ```
+
+2. **When merging to main**: Use **Squash and Merge** (via GitHub UI)
+
+   - Keeps main history clean
+
+   - One commit per feature
+
+   - Easy to track what was added
+
+3. **For hotfixes**: Use **Fast-Forward** or **Merge Commit**
+
+   - Depends on whether branch has diverged
+
+   - Preserves urgency context
+
+**GitHub Settings:**
+
+- Go to repository Settings → General → Pull Requests
+
+- Set default merge method to "Squash and merge"
+
+- Allow "Rebase and merge" for special cases
+
+- Keep "Create a merge commit" available for complex merges
+
+### Workflow Example
+
+```bash
+# 1. Create feature branch
+git checkout main
+git pull origin main
+git checkout -b feat/new-feature
+
+# 2. Make changes and commit
+git add .
+git commit -m "feat: add initial implementation"
+git commit -m "fix: resolve edge case"
+git commit -m "test: add unit tests"
+
+# 3. Keep branch updated (rebase)
+git checkout main
+git pull origin main
+git checkout feat/new-feature
+git rebase main
+# Resolve conflicts if any
+git add .
+git rebase --continue
+
+# 4. Push and create PR
+git push origin feat/new-feature
+# Create PR via GitHub UI or VSCode extension
+
+# 5. After PR approval, merge using "Squash and Merge" on GitHub
+# This creates one clean commit on main
+```
+
+---
+
+## Quick Reference
+
+### Daily Workflow
+
+```bash
+# Start new feature
+git checkout main && git pull
+git checkout -b feat/feature-name
+
+# Make changes, then commit
+git add .
+git commit -m "feat: description"  # Pre-commit hook runs automatically
+
+# Keep branch updated
+git rebase main
+
+# Push and create PR
+git push origin feat/feature-name
+```
+
+### Troubleshooting
+
+**Pre-commit hook fails:**
+
+```bash
+# Fix issues manually
+npm run check:fix
+git add .
+git commit -m "feat: description"
+```
+
+**Commit message rejected:**
+
+```bash
+# Check format
+echo "your message" | npx commitlint
+# Fix and commit again
+```
+
+**Merge conflicts during rebase:**
+
+```bash
+# Resolve conflicts in files
+git add .
+git rebase --continue
+# Or abort: git rebase --abort
+```
+
+---
+
+## Additional Resources
+
+- [Conventional Commits](https://www.conventionalcommits.org/)
+
+- [Biome Documentation](https://biomejs.dev/)
+
+- [Husky Documentation](https://typicode.github.io/husky/)
+
+- [Git Branching Strategies](https://www.atlassian.com/git/tutorials/comparing-workflows)
+
+- [GitHub Pull Requests Extension](https://marketplace.visualstudio.com/items?itemName=GitHub.vscode-pull-request-github)
+
+---
+
+**Last Updated:** 2024
+**Maintained by:** Development Team
